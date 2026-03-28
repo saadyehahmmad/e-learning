@@ -8,6 +8,11 @@ import {
   Delete,
   UseGuards,
   Query,
+  Request,
+  ForbiddenException,
+  NotFoundException,
+  HttpStatus,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { QuestionsService } from './questions.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
@@ -27,6 +32,10 @@ import {
 } from '../utils/dto/infinity-pagination-response.dto';
 import { infinityPagination } from '../utils/infinity-pagination';
 import { FindAllQuestionsDto } from './dto/find-all-questions.dto';
+import { Roles } from '../roles/roles.decorator';
+import { RoleEnum } from '../roles/roles.enum';
+import { RolesGuard } from '../roles/roles.guard';
+import { QuizzesService } from '../quizzes/quizzes.service';
 
 @ApiTags('Questions')
 @ApiBearerAuth()
@@ -36,13 +45,22 @@ import { FindAllQuestionsDto } from './dto/find-all-questions.dto';
   version: '1',
 })
 export class QuestionsController {
-  constructor(private readonly questionsService: QuestionsService) {}
+  constructor(
+    private readonly questionsService: QuestionsService,
+    private readonly quizzesService: QuizzesService,
+  ) {}
 
   @Post()
+  @Roles(RoleEnum.admin)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiCreatedResponse({
     type: Question,
   })
-  create(@Body() createQuestionDto: CreateQuestionDto) {
+  async create(@Request() request, @Body() createQuestionDto: CreateQuestionDto) {
+    await this._assertPlacementQuestionRulesForCreate(
+      request,
+      createQuestionDto.quiz.id,
+    );
     return this.questionsService.create(createQuestionDto);
   }
 
@@ -84,6 +102,8 @@ export class QuestionsController {
   }
 
   @Patch(':id')
+  @Roles(RoleEnum.admin)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiParam({
     name: 'id',
     type: String,
@@ -93,19 +113,140 @@ export class QuestionsController {
     type: Question,
   })
   update(
+    @Request() request,
     @Param('id') id: string,
     @Body() updateQuestionDto: UpdateQuestionDto,
   ) {
+    return this._authorizeAndUpdate(request, id, updateQuestionDto);
+  }
+
+  /**
+   * Applies placement rules then persists question updates.
+   */
+  private async _authorizeAndUpdate(
+    request,
+    id: string,
+    updateQuestionDto: UpdateQuestionDto,
+  ) {
+    await this._assertPlacementQuestionRulesForUpdate(request, id, updateQuestionDto);
     return this.questionsService.update(id, updateQuestionDto);
   }
 
   @Delete(':id')
+  @Roles(RoleEnum.admin)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiParam({
     name: 'id',
     type: String,
     required: true,
   })
-  remove(@Param('id') id: string) {
+  async remove(@Request() request, @Param('id') id: string) {
+    await this._assertPlacementQuestionRulesForDelete(request, id);
     return this.questionsService.remove(id);
+  }
+
+  /**
+   * Applies placement constraints before creating question.
+   */
+  private async _assertPlacementQuestionRulesForCreate(
+    request,
+    quizId: string,
+  ): Promise<void> {
+    const isPlacementQuiz = await this.quizzesService.isPlacementQuizById(quizId);
+    if (!isPlacementQuiz) {
+      return;
+    }
+
+    this._assertAdminForPlacementQuestionMutation(request);
+    const questions = await this.quizzesService.getQuestionsByQuizId(quizId);
+    if (questions.length >= 50) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          placementTest: 'max50Questions',
+        },
+      });
+    }
+  }
+
+  /**
+   * Applies placement constraints before updating question.
+   */
+  private async _assertPlacementQuestionRulesForUpdate(
+    request,
+    questionId: string,
+    updateQuestionDto: UpdateQuestionDto,
+  ): Promise<void> {
+    const existingQuestion = await this.questionsService.findById(questionId);
+    if (!existingQuestion) {
+      throw new NotFoundException('Question not found');
+    }
+
+    const isCurrentPlacement = await this.quizzesService.isPlacementQuizById(
+      existingQuestion.quiz.id,
+    );
+    const targetQuizId = updateQuestionDto.quiz?.id ?? existingQuestion.quiz.id;
+    const isTargetPlacement = await this.quizzesService.isPlacementQuizById(targetQuizId);
+
+    if (!isCurrentPlacement && !isTargetPlacement) {
+      return;
+    }
+
+    this._assertAdminForPlacementQuestionMutation(request);
+
+    if (isCurrentPlacement && !isTargetPlacement) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          placementTest: 'cannotMoveQuestionOut',
+        },
+      });
+    }
+
+    if (!isCurrentPlacement && isTargetPlacement) {
+      const targetQuestions = await this.quizzesService.getQuestionsByQuizId(targetQuizId);
+      if (targetQuestions.length >= 50) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            placementTest: 'max50Questions',
+          },
+        });
+      }
+    }
+  }
+
+  /**
+   * Applies placement constraints before deleting question.
+   */
+  private async _assertPlacementQuestionRulesForDelete(
+    request,
+    questionId: string,
+  ): Promise<void> {
+    const question = await this.questionsService.findById(questionId);
+    if (!question) {
+      throw new NotFoundException('Question not found');
+    }
+
+    const isPlacementQuiz = await this.quizzesService.isPlacementQuizById(
+      question.quiz.id,
+    );
+    if (!isPlacementQuiz) {
+      return;
+    }
+
+    this._assertAdminForPlacementQuestionMutation(request);
+  }
+
+  /**
+   * Restricts placement question mutations to admin users only.
+   */
+  private _assertAdminForPlacementQuestionMutation(request): void {
+    const actorRoleId = Number(request.user?.role?.id);
+    if (actorRoleId !== RoleEnum.admin) {
+      throw new ForbiddenException(
+        'Only admins can edit placement test questions.',
+      );
+    }
   }
 }

@@ -19,6 +19,12 @@ export class BookingMapper {
     domainEntity.startTime = raw.startTime;
 
     domainEntity.bookingDate = raw.bookingDate;
+    domainEntity.meetingProvider = (raw.meetingProvider as
+      | 'zoom'
+      | 'google_meet'
+      | null
+      | undefined) ?? null;
+    domainEntity.meetingLink = raw.meetingLink ?? null;
 
     domainEntity.id = raw.id;
     domainEntity.createdAt = raw.createdAt;
@@ -44,6 +50,8 @@ export class BookingMapper {
     persistenceEntity.startTime = domainEntity.startTime;
 
     persistenceEntity.bookingDate = domainEntity.bookingDate;
+    persistenceEntity.meetingProvider = domainEntity.meetingProvider ?? null;
+    persistenceEntity.meetingLink = domainEntity.meetingLink ?? null;
 
     if (domainEntity.id) {
       persistenceEntity.id = domainEntity.id;

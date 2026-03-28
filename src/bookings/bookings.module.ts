@@ -1,4 +1,5 @@
 import { UsersModule } from '../users/users.module';
+import { EnrollmentsModule } from '../enrollments/enrollments.module';
 import {
   // do not remove this comment
   Module,
@@ -10,6 +11,7 @@ import { RelationalBookingPersistenceModule } from './infrastructure/persistence
 @Module({
   imports: [
     UsersModule,
+    EnrollmentsModule,
 
     // do not remove this comment
     RelationalBookingPersistenceModule,

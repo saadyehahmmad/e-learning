@@ -76,8 +76,66 @@ export class QuizzesService {
     return this.quizRepository.findById(id);
   }
 
+  /**
+   * Returns placement quiz if available.
+   */
+  findPlacementQuiz() {
+    return this.quizRepository.findPlacementTest();
+  }
+
   findByIds(ids: Quiz['id'][]) {
     return this.quizRepository.findByIds(ids);
+  }
+
+  /**
+   * Returns question list for a given quiz.
+   */
+  getQuestionsByQuizId(quizId: string) {
+    return this.questionRepository.findByQuizId(quizId);
+  }
+
+  /**
+   * Returns all student answers for a given quiz.
+   */
+  getAnswersByQuizId(quizId: string) {
+    return this.studentAnswerRepository.findByQuizId(quizId);
+  }
+
+  /**
+   * Returns a student's answers for a given quiz.
+   */
+  getAnswersByQuizIdAndStudentId(quizId: string, studentId: number) {
+    return this.studentAnswerRepository.findByQuizIdAndStudentId(quizId, studentId);
+  }
+
+  /**
+   * Returns whether given quiz is the placement test.
+   */
+  async isPlacementQuizById(quizId: string): Promise<boolean> {
+    const quiz = await this.quizRepository.findById(quizId);
+    if (!quiz) {
+      return false;
+    }
+    return this._isPlacementQuiz(quiz.title);
+  }
+
+  /**
+   * Returns whether student already submitted at least one answer for quiz.
+   */
+  async hasStudentAttempt(quizId: string, studentId: number): Promise<boolean> {
+    const existingAttempt =
+      await this.studentAnswerRepository.findByQuizIdAndStudentId(quizId, studentId);
+    return existingAttempt.length > 0;
+  }
+
+  /**
+   * Returns compact attempt summary for current student and quiz.
+   */
+  getStudentAttemptSummary(quizId: string, studentId: number) {
+    return this.studentAnswerRepository.getAttemptSummaryByQuizIdAndStudentId(
+      quizId,
+      studentId,
+    );
   }
 
   async update(
@@ -150,6 +208,34 @@ export class QuizzesService {
     }
 
     const questions = await this.questionRepository.findByQuizId(quizId);
+    if (this._isPlacementQuiz(quiz.title)) {
+      if (questions.length !== 50) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            placementTest: 'mustContain50Questions',
+          },
+        });
+      }
+      if (submitQuizDto.answers.length !== questions.length) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            placementTest: 'allQuestionsAreRequired',
+          },
+        });
+      }
+      const existingAttempt =
+        await this.studentAnswerRepository.findByQuizIdAndStudentId(quizId, studentId);
+      if (existingAttempt.length) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            placementTest: 'alreadySubmitted',
+          },
+        });
+      }
+    }
     const questionsById = new Map(
       questions.map((question) => [String(question.id), question]),
     );
@@ -169,10 +255,18 @@ export class QuizzesService {
           },
         });
       }
+      if (this._isPlacementQuiz(quiz.title) && !this._hasAnswerContent(submittedAnswer.answer)) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            placementTest: `answerRequired:${submittedAnswer.questionId}`,
+          },
+        });
+      }
 
       const isCorrect =
-        question.correctAnswer.trim().toLowerCase() ===
-        submittedAnswer.answer.trim().toLowerCase();
+        this._normalizeAnswer(question.correctAnswer) ===
+        this._normalizeAnswer(submittedAnswer.answer);
 
       if (isCorrect) {
         correctAnswers += 1;
@@ -209,5 +303,49 @@ export class QuizzesService {
       passed: passingScore === null ? true : score >= passingScore,
       answers: results,
     };
+  }
+
+  /**
+   * Returns true when quiz is used as one-time placement test.
+   */
+  private _isPlacementQuiz(title: string): boolean {
+    const normalized = (title || '').trim().toLowerCase();
+    return normalized === 'placement test' || normalized.includes('placement');
+  }
+
+  /**
+   * Normalizes answer payload to support multi-answer comparisons.
+   */
+  private _normalizeAnswer(answer: string): string {
+    const raw = (answer || '').trim().toLowerCase();
+    if (!raw.includes('||')) {
+      return raw;
+    }
+
+    return raw
+      .split('||')
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .sort()
+      .join('||');
+  }
+
+  /**
+   * Validates submitted answer has meaningful content.
+   */
+  private _hasAnswerContent(answer: string): boolean {
+    const raw = (answer || '').trim();
+    if (!raw) {
+      return false;
+    }
+
+    if (!raw.includes('||')) {
+      return true;
+    }
+
+    return raw
+      .split('||')
+      .map((value) => value.trim())
+      .filter(Boolean).length > 0;
   }
 }

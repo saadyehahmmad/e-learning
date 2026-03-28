@@ -44,6 +44,19 @@ export class QuizRelationalRepository implements QuizRepository {
     return entity ? QuizMapper.toDomain(entity) : null;
   }
 
+  async findPlacementTest(): Promise<NullableType<Quiz>> {
+    const entity = await this.quizRepository
+      .createQueryBuilder('quiz')
+      .leftJoinAndSelect('quiz.course', 'course')
+      .leftJoinAndSelect('course.tutor', 'tutor')
+      .where('LOWER(quiz.title) = :exactTitle', { exactTitle: 'placement test' })
+      .orWhere('LOWER(quiz.title) LIKE :partialTitle', { partialTitle: '%placement%' })
+      .orderBy('quiz.createdAt', 'DESC')
+      .getOne();
+
+    return entity ? QuizMapper.toDomain(entity) : null;
+  }
+
   async findByIds(ids: Quiz['id'][]): Promise<Quiz[]> {
     const entities = await this.quizRepository.find({
       where: { id: In(ids) },

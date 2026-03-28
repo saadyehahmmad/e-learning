@@ -16,6 +16,8 @@ export abstract class QuizRepository {
 
   abstract findById(id: Quiz['id']): Promise<NullableType<Quiz>>;
 
+  abstract findPlacementTest(): Promise<NullableType<Quiz>>;
+
   abstract findByIds(ids: Quiz['id'][]): Promise<Quiz[]>;
 
   abstract update(

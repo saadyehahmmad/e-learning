@@ -8,6 +8,9 @@ import {
   Delete,
   UseGuards,
   Query,
+  Request,
+  ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -27,6 +30,9 @@ import {
 } from '../utils/dto/infinity-pagination-response.dto';
 import { infinityPagination } from '../utils/infinity-pagination';
 import { FindAllCoursesDto } from './dto/find-all-courses.dto';
+import { Roles } from '../roles/roles.decorator';
+import { RoleEnum } from '../roles/roles.enum';
+import { RolesGuard } from '../roles/roles.guard';
 
 @ApiTags('Courses')
 @ApiBearerAuth()
@@ -39,10 +45,17 @@ export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
   @Post()
+  @Roles(RoleEnum.admin, RoleEnum.tutor)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiCreatedResponse({
     type: Course,
   })
-  create(@Body() createCourseDto: CreateCourseDto) {
+  create(@Request() request, @Body() createCourseDto: CreateCourseDto) {
+    const actorRoleId = Number(request.user?.role?.id);
+    if (actorRoleId === RoleEnum.tutor) {
+      createCourseDto.tutor = { id: request.user.id } as CreateCourseDto['tutor'];
+    }
+
     return this.coursesService.create(createCourseDto);
   }
 
@@ -84,6 +97,8 @@ export class CoursesController {
   }
 
   @Patch(':id')
+  @Roles(RoleEnum.admin, RoleEnum.tutor)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiParam({
     name: 'id',
     type: String,
@@ -92,17 +107,53 @@ export class CoursesController {
   @ApiOkResponse({
     type: Course,
   })
-  update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDto) {
+  async update(
+    @Request() request,
+    @Param('id') id: string,
+    @Body() updateCourseDto: UpdateCourseDto,
+  ) {
+    await this._assertTutorOwnsCourseIfNeeded(request, id);
+
+    const actorRoleId = Number(request.user?.role?.id);
+    if (actorRoleId === RoleEnum.tutor && updateCourseDto.tutor) {
+      updateCourseDto.tutor = { id: request.user.id } as UpdateCourseDto['tutor'];
+    }
+
     return this.coursesService.update(id, updateCourseDto);
   }
 
   @Delete(':id')
+  @Roles(RoleEnum.admin, RoleEnum.tutor)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiParam({
     name: 'id',
     type: String,
     required: true,
   })
-  remove(@Param('id') id: string) {
+  async remove(@Request() request, @Param('id') id: string) {
+    await this._assertTutorOwnsCourseIfNeeded(request, id);
     return this.coursesService.remove(id);
+  }
+
+  /**
+   * Ensures tutor can only mutate their own courses.
+   */
+  private async _assertTutorOwnsCourseIfNeeded(
+    request,
+    courseId: string,
+  ): Promise<void> {
+    const actorRoleId = Number(request.user?.role?.id);
+    if (actorRoleId !== RoleEnum.tutor) {
+      return;
+    }
+
+    const course = await this.coursesService.findById(courseId);
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    if (String(course.tutor?.id) !== String(request.user.id)) {
+      throw new ForbiddenException('Tutors can only manage their own courses.');
+    }
   }
 }

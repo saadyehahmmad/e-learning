@@ -51,6 +51,11 @@ export class BookingsService {
     }
     const student = studentObject;
 
+    this._assertMeetingLinkMatchesProvider(
+      createBookingDto.meetingProvider,
+      createBookingDto.meetingLink,
+    );
+
     return this.bookingRepository.create({
       // Do not remove comment below.
       // <creating-property-payload />
@@ -63,6 +68,8 @@ export class BookingsService {
       startTime: createBookingDto.startTime,
 
       bookingDate: createBookingDto.bookingDate,
+      meetingProvider: createBookingDto.meetingProvider ?? null,
+      meetingLink: createBookingDto.meetingLink?.trim() || null,
     });
   }
 
@@ -128,6 +135,11 @@ export class BookingsService {
       student = studentObject;
     }
 
+    this._assertMeetingLinkMatchesProvider(
+      updateBookingDto.meetingProvider,
+      updateBookingDto.meetingLink,
+    );
+
     return this.bookingRepository.update(id, {
       // Do not remove comment below.
       // <updating-property-payload />
@@ -140,10 +152,49 @@ export class BookingsService {
       startTime: updateBookingDto.startTime,
 
       bookingDate: updateBookingDto.bookingDate,
+      ...(updateBookingDto.meetingProvider !== undefined
+        ? { meetingProvider: updateBookingDto.meetingProvider }
+        : {}),
+      ...(updateBookingDto.meetingLink !== undefined
+        ? { meetingLink: updateBookingDto.meetingLink?.trim() || null }
+        : {}),
     });
   }
 
   remove(id: Booking['id']) {
     return this.bookingRepository.remove(id);
+  }
+
+  /**
+   * Validates provider-link compatibility for online meeting links.
+   */
+  private _assertMeetingLinkMatchesProvider(
+    meetingProvider?: 'zoom' | 'google_meet',
+    meetingLink?: string,
+  ) {
+    if (!meetingLink) {
+      return;
+    }
+
+    const normalizedLink = meetingLink.trim().toLowerCase();
+    if (meetingProvider === 'zoom' && !normalizedLink.includes('zoom.us')) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          meetingLink: 'zoomLinkExpected',
+        },
+      });
+    }
+    if (
+      meetingProvider === 'google_meet' &&
+      !normalizedLink.includes('meet.google.com')
+    ) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          meetingLink: 'googleMeetLinkExpected',
+        },
+      });
+    }
   }
 }

@@ -38,6 +38,18 @@ export class BookingEntity extends EntityRelationalHelper {
   })
   bookingDate: Date;
 
+  @Column({
+    nullable: true,
+    type: String,
+  })
+  meetingProvider?: string | null;
+
+  @Column({
+    nullable: true,
+    type: String,
+  })
+  meetingLink?: string | null;
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

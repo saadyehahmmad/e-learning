@@ -11,7 +11,10 @@ import {
   // decorators here
 
   IsDate,
+  IsIn,
+  IsOptional,
   IsString,
+  IsUrl,
   ValidateNested,
   IsNotEmptyObject,
 } from 'class-validator';
@@ -61,6 +64,31 @@ export class CreateBookingDto {
   @Transform(({ value }) => new Date(value))
   @IsDate()
   bookingDate: Date;
+
+  @ApiProperty({
+    required: false,
+    enum: ['zoom', 'google_meet'],
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['zoom', 'google_meet'])
+  meetingProvider?: 'zoom' | 'google_meet';
+
+  @ApiProperty({
+    required: false,
+    type: () => String,
+  })
+  @IsOptional()
+  @IsString()
+  @IsUrl(
+    {
+      require_protocol: true,
+    },
+    {
+      message: 'meetingLink must be a valid URL',
+    },
+  )
+  meetingLink?: string;
 
   // Don't forget to use the class-validator decorators in the DTO properties.
 }

@@ -19,14 +19,16 @@ export class UserSeedService {
       {
         firstName: 'Super',
         lastName: 'Admin',
-        email: 'admin@example.com',
+        email: 'user@admin.com',
+        password: 'admin',
         roleId: RoleEnum.admin,
         roleName: 'Admin',
       },
       {
         firstName: 'Jane',
         lastName: 'Tutor',
-        email: 'jane.tutor@example.com',
+        email: 'user@tutor.com',
+        password: 'tutor',
         roleId: RoleEnum.tutor,
         roleName: 'Tutor',
         bio: 'Certified English tutor focused on speaking confidence.',
@@ -37,7 +39,8 @@ export class UserSeedService {
       {
         firstName: 'John',
         lastName: 'Student',
-        email: 'john.student@example.com',
+        email: 'user@student.com',
+        password: 'student',
         roleId: RoleEnum.student,
         roleName: 'Student',
         learningGoals: 'Improve speaking and business writing',
@@ -45,38 +48,40 @@ export class UserSeedService {
       },
     ];
 
-    const salt = await bcrypt.genSalt();
-    const password = await bcrypt.hash('secret', salt);
-
     for (const user of usersToSeed) {
-      const count = await this.repository.count({
-        where: { role: { id: user.roleId } },
+      const existingUserByEmail = await this.repository.findOne({
+        where: { email: user.email },
       });
+      const existingUserByRole = existingUserByEmail
+        ? null
+        : await this.repository.findOne({
+            where: { role: { id: user.roleId } },
+          });
+      const hashedPassword = await bcrypt.hash(user.password, 10);
 
-      if (!count) {
-        await this.repository.save(
-          this.repository.create({
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            password,
-            bio: user.bio,
-            hourlyRate: user.hourlyRate,
-            spokenLanguages: user.spokenLanguages,
-            certifications: user.certifications,
-            learningGoals: user.learningGoals,
-            englishLevel: user.englishLevel,
-            role: {
-              id: user.roleId,
-              name: user.roleName,
-            },
-            status: {
-              id: StatusEnum.active,
-              name: 'Active',
-            },
-          }),
-        );
-      }
+      await this.repository.save(
+        this.repository.create({
+          id: existingUserByEmail?.id ?? existingUserByRole?.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          password: hashedPassword,
+          bio: user.bio,
+          hourlyRate: user.hourlyRate,
+          spokenLanguages: user.spokenLanguages,
+          certifications: user.certifications,
+          learningGoals: user.learningGoals,
+          englishLevel: user.englishLevel,
+          role: {
+            id: user.roleId,
+            name: user.roleName,
+          },
+          status: {
+            id: StatusEnum.active,
+            name: 'Active',
+          },
+        }),
+      );
     }
   }
 }

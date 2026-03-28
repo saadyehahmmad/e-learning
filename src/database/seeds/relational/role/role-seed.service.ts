@@ -20,10 +20,7 @@ export class RoleSeedService {
     ];
 
     for (const role of rolesToSeed) {
-      const count = await this.repository.count({ where: { id: role.id } });
-      if (!count) {
-        await this.repository.save(this.repository.create(role));
-      }
+      await this.repository.save(this.repository.create(role));
     }
   }
 }

@@ -33,6 +33,19 @@ export class Booking {
   bookingDate: Date;
 
   @ApiProperty({
+    type: () => String,
+    nullable: true,
+    enum: ['zoom', 'google_meet'],
+  })
+  meetingProvider?: 'zoom' | 'google_meet' | null;
+
+  @ApiProperty({
+    type: () => String,
+    nullable: true,
+  })
+  meetingLink?: string | null;
+
+  @ApiProperty({
     type: String,
   })
   id: string;

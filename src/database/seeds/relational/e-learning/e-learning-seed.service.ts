@@ -15,6 +15,9 @@ import { StudentAnswerEntity } from '../../../../student-answers/infrastructure/
 import { PaymentEntity } from '../../../../payments/infrastructure/persistence/relational/entities/payment.entity';
 import { PaymentStatusEnum } from '../../../../payments/payment-status.enum';
 
+const SEEDED_TUTOR_EMAIL = 'user@tutor.com';
+const SEEDED_STUDENT_EMAIL = 'user@student.com';
+
 @Injectable()
 export class ELearningSeedService {
   constructor(
@@ -47,15 +50,15 @@ export class ELearningSeedService {
    */
   async run(): Promise<void> {
     const tutor = await this.usersRepository.findOne({
-      where: { role: { id: RoleEnum.tutor } },
+      where: { email: SEEDED_TUTOR_EMAIL, role: { id: RoleEnum.tutor } },
     });
     const student = await this.usersRepository.findOne({
-      where: { role: { id: RoleEnum.student } },
+      where: { email: SEEDED_STUDENT_EMAIL, role: { id: RoleEnum.student } },
     });
 
     if (!tutor || !student) {
       throw new NotFoundException(
-        'Tutor and Student users must exist before E-Learning seed runs',
+        `Seed users ${SEEDED_TUTOR_EMAIL} and ${SEEDED_STUDENT_EMAIL} must exist before E-Learning seed runs`,
       );
     }
 
@@ -130,46 +133,22 @@ export class ELearningSeedService {
       comment: 'Very clear explanations and useful speaking tips.',
     });
 
-    const quiz = await this.ensureQuiz({
+    const placementQuiz = await this.ensureQuiz({
       course: courseA,
-      title: 'A1 Checkpoint Quiz',
-      description: 'Quick quiz after the first two lessons.',
-      passingScore: 70,
+      title: 'Placement Test',
+      description:
+        'One-time entry assessment with 50 timed questions for level grading.',
+      passingScore: 60,
     });
-
-    const questionA = await this.ensureQuestion({
-      quiz,
-      prompt: 'Choose the correct sentence:',
-      options: JSON.stringify([
-        'She go to school every day.',
-        'She goes to school every day.',
-        'She going to school every day.',
-      ]),
-      correctAnswer: 'She goes to school every day.',
-    });
-    const questionB = await this.ensureQuestion({
-      quiz,
-      prompt: 'Select the best greeting in a formal email:',
-      options: JSON.stringify(['Hi buddy,', 'Dear Mr. Smith,', 'Yo!']),
-      correctAnswer: 'Dear Mr. Smith,',
-    });
-
-    await this.ensureStudentAnswer({
-      student,
-      quiz,
-      question: questionA,
-      answer: 'She goes to school every day.',
-      isCorrect: true,
-      submittedAt: new Date('2026-04-01T10:00:00.000Z'),
-    });
-    await this.ensureStudentAnswer({
-      student,
-      quiz,
-      question: questionB,
-      answer: 'Dear Mr. Smith,',
-      isCorrect: true,
-      submittedAt: new Date('2026-04-01T10:01:00.000Z'),
-    });
+    const placementQuestions = this._buildPlacementQuestions();
+    for (const questionData of placementQuestions) {
+      await this.ensureQuestion({
+        quiz: placementQuiz,
+        prompt: questionData.prompt,
+        options: questionData.options,
+        correctAnswer: questionData.correctAnswer,
+      });
+    }
 
     await this.ensurePayment({
       enrollment: enrollmentA,
@@ -407,5 +386,61 @@ export class ELearningSeedService {
     }
 
     return this.paymentsRepository.save(this.paymentsRepository.create(data));
+  }
+
+  /**
+   * Builds 50 placement questions with single, multi, and text answer formats.
+   */
+  private _buildPlacementQuestions(): Array<{
+    prompt: string;
+    options: string;
+    correctAnswer: string;
+  }> {
+    const singleQuestions = Array.from({ length: 20 }).map((_, index) => {
+      const number = index + 1;
+      return {
+        prompt: `Single ${number}: Choose the correct sentence form.`,
+        options: JSON.stringify({
+          type: 'single',
+          options: [
+            `I has lesson ${number}.`,
+            `I have lesson ${number}.`,
+            `I having lesson ${number}.`,
+            `I am have lesson ${number}.`,
+          ],
+        }),
+        correctAnswer: `I have lesson ${number}.`,
+      };
+    });
+
+    const multiQuestions = Array.from({ length: 15 }).map((_, index) => {
+      const number = index + 1;
+      const optionA = `a${number} grammar`;
+      const optionB = `b${number} vocabulary`;
+      const optionC = `c${number} spelling`;
+      const optionD = `d${number} punctuation`;
+      return {
+        prompt: `Multi ${number}: Select all core language skills.`,
+        options: JSON.stringify({
+          type: 'multi',
+          options: [optionA, optionB, optionC, optionD],
+        }),
+        correctAnswer: [optionA, optionB, optionC].sort().join('||'),
+      };
+    });
+
+    const textQuestions = Array.from({ length: 15 }).map((_, index) => {
+      const number = index + 1;
+      return {
+        prompt: `Text ${number}: Write the past tense of "go".`,
+        options: JSON.stringify({
+          type: 'text',
+          options: [],
+        }),
+        correctAnswer: 'went',
+      };
+    });
+
+    return [...singleQuestions, ...multiQuestions, ...textQuestions];
   }
 }

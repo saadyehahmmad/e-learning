@@ -8,6 +8,9 @@ import {
   Delete,
   UseGuards,
   Query,
+  Request,
+  ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { LessonsService } from './lessons.service';
 import { CreateLessonDto } from './dto/create-lesson.dto';
@@ -27,6 +30,10 @@ import {
 } from '../utils/dto/infinity-pagination-response.dto';
 import { infinityPagination } from '../utils/infinity-pagination';
 import { FindAllLessonsDto } from './dto/find-all-lessons.dto';
+import { Roles } from '../roles/roles.decorator';
+import { RoleEnum } from '../roles/roles.enum';
+import { RolesGuard } from '../roles/roles.guard';
+import { CoursesService } from '../courses/courses.service';
 
 @ApiTags('Lessons')
 @ApiBearerAuth()
@@ -36,13 +43,19 @@ import { FindAllLessonsDto } from './dto/find-all-lessons.dto';
   version: '1',
 })
 export class LessonsController {
-  constructor(private readonly lessonsService: LessonsService) {}
+  constructor(
+    private readonly lessonsService: LessonsService,
+    private readonly coursesService: CoursesService,
+  ) {}
 
   @Post()
+  @Roles(RoleEnum.admin, RoleEnum.tutor)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiCreatedResponse({
     type: Lesson,
   })
-  create(@Body() createLessonDto: CreateLessonDto) {
+  async create(@Request() request, @Body() createLessonDto: CreateLessonDto) {
+    await this._assertTutorOwnsCourseIfNeeded(request, createLessonDto.course.id);
     return this.lessonsService.create(createLessonDto);
   }
 
@@ -84,6 +97,8 @@ export class LessonsController {
   }
 
   @Patch(':id')
+  @Roles(RoleEnum.admin, RoleEnum.tutor)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiParam({
     name: 'id',
     type: String,
@@ -92,17 +107,76 @@ export class LessonsController {
   @ApiOkResponse({
     type: Lesson,
   })
-  update(@Param('id') id: string, @Body() updateLessonDto: UpdateLessonDto) {
+  async update(
+    @Request() request,
+    @Param('id') id: string,
+    @Body() updateLessonDto: UpdateLessonDto,
+  ) {
+    await this._assertTutorOwnsLessonIfNeeded(request, id);
+    if (updateLessonDto.course?.id) {
+      await this._assertTutorOwnsCourseIfNeeded(request, updateLessonDto.course.id);
+    }
     return this.lessonsService.update(id, updateLessonDto);
   }
 
   @Delete(':id')
+  @Roles(RoleEnum.admin, RoleEnum.tutor)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiParam({
     name: 'id',
     type: String,
     required: true,
   })
-  remove(@Param('id') id: string) {
+  async remove(@Request() request, @Param('id') id: string) {
+    await this._assertTutorOwnsLessonIfNeeded(request, id);
     return this.lessonsService.remove(id);
+  }
+
+  /**
+   * Ensures tutor can only use own courses for lessons.
+   */
+  private async _assertTutorOwnsCourseIfNeeded(
+    request,
+    courseId: string,
+  ): Promise<void> {
+    const actorRoleId = Number(request.user?.role?.id);
+    if (actorRoleId !== RoleEnum.tutor) {
+      return;
+    }
+
+    const course = await this.coursesService.findById(courseId);
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    if (String(course.tutor?.id) !== String(request.user.id)) {
+      throw new ForbiddenException(
+        'Tutors can only manage lessons for their own courses.',
+      );
+    }
+  }
+
+  /**
+   * Ensures tutor can only mutate own lesson records.
+   */
+  private async _assertTutorOwnsLessonIfNeeded(
+    request,
+    lessonId: string,
+  ): Promise<void> {
+    const actorRoleId = Number(request.user?.role?.id);
+    if (actorRoleId !== RoleEnum.tutor) {
+      return;
+    }
+
+    const lesson = await this.lessonsService.findById(lessonId);
+    if (!lesson) {
+      throw new NotFoundException('Lesson not found');
+    }
+
+    if (String(lesson.course?.tutor?.id) !== String(request.user.id)) {
+      throw new ForbiddenException(
+        'Tutors can only manage lessons for their own courses.',
+      );
+    }
   }
 }

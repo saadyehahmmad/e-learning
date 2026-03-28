@@ -14,6 +14,18 @@ export abstract class StudentAnswerRepository {
     paginationOptions: IPaginationOptions;
   }): Promise<StudentAnswer[]>;
 
+  abstract findByQuizId(quizId: string): Promise<StudentAnswer[]>;
+
+  abstract findByQuizIdAndStudentId(
+    quizId: string,
+    studentId: number,
+  ): Promise<StudentAnswer[]>;
+
+  abstract getAttemptSummaryByQuizIdAndStudentId(
+    quizId: string,
+    studentId: number,
+  ): Promise<{ attemptCount: number; lastSubmittedAt: Date | null }>;
+
   abstract findById(
     id: StudentAnswer['id'],
   ): Promise<NullableType<StudentAnswer>>;

@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
   Column,
   ManyToOne,
+  RelationId,
 } from 'typeorm';
 import { EntityRelationalHelper } from '../../../../../utils/relational-entity-helper';
 
@@ -21,6 +22,10 @@ export class EnrollmentEntity extends EntityRelationalHelper {
 
   @ManyToOne(() => UserEntity, { eager: true, nullable: false })
   student: UserEntity;
+
+  /** FK used when `student` is not joined (e.g. soft-deleted user). */
+  @RelationId((enrollment: EnrollmentEntity) => enrollment.student)
+  studentId?: number;
 
   @Column({
     nullable: true,
