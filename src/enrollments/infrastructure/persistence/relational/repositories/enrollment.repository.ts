@@ -132,7 +132,8 @@ export class EnrollmentRelationalRepository implements EnrollmentRepository {
   private async _hydrateMissingStudents(
     entities: EnrollmentEntity[],
   ): Promise<void> {
-    const userRepo = this.enrollmentRepository.manager.getRepository(UserEntity);
+    const userRepo =
+      this.enrollmentRepository.manager.getRepository(UserEntity);
 
     for (const entity of entities) {
       if (entity.student || entity.studentId == null) {

@@ -83,7 +83,9 @@ export class BookingsController {
     const actorId = request.user?.id;
     const scopedBookings =
       actorRoleId === RoleEnum.tutor
-        ? bookings.filter((booking) => String(booking.tutor?.id) === String(actorId))
+        ? bookings.filter(
+            (booking) => String(booking.tutor?.id) === String(actorId),
+          )
         : actorRoleId === RoleEnum.student
           ? bookings.filter(
               (booking) => String(booking.student?.id) === String(actorId),
@@ -156,7 +158,10 @@ export class BookingsController {
   /**
    * Enforces tutor-driven one-to-one booking creation policy.
    */
-  private async _assertCreatePolicy(request, createBookingDto: CreateBookingDto) {
+  private async _assertCreatePolicy(
+    request,
+    createBookingDto: CreateBookingDto,
+  ) {
     const actorRoleId = Number(request.user?.role?.id);
     const actorId = request.user?.id;
     if (actorRoleId === RoleEnum.tutor) {
@@ -174,7 +179,8 @@ export class BookingsController {
       });
       const hasTutorStudentRelation = enrollments.some(
         (enrollment) =>
-          String(enrollment.student?.id) === String(createBookingDto.student.id) &&
+          String(enrollment.student?.id) ===
+            String(createBookingDto.student.id) &&
           String(enrollment.course?.tutor?.id) === String(actorId),
       );
       if (!hasTutorStudentRelation) {
@@ -199,13 +205,17 @@ export class BookingsController {
       actorRoleId === RoleEnum.tutor &&
       String(booking.tutor?.id) !== String(actorId)
     ) {
-      throw new ForbiddenException('Tutors can only access their own bookings.');
+      throw new ForbiddenException(
+        'Tutors can only access their own bookings.',
+      );
     }
     if (
       actorRoleId === RoleEnum.student &&
       String(booking.student?.id) !== String(actorId)
     ) {
-      throw new ForbiddenException('Students can only access their own bookings.');
+      throw new ForbiddenException(
+        'Students can only access their own bookings.',
+      );
     }
   }
 }

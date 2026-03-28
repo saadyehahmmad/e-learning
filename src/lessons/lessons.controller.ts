@@ -55,7 +55,10 @@ export class LessonsController {
     type: Lesson,
   })
   async create(@Request() request, @Body() createLessonDto: CreateLessonDto) {
-    await this._assertTutorOwnsCourseIfNeeded(request, createLessonDto.course.id);
+    await this._assertTutorOwnsCourseIfNeeded(
+      request,
+      createLessonDto.course.id,
+    );
     return this.lessonsService.create(createLessonDto);
   }
 
@@ -114,7 +117,10 @@ export class LessonsController {
   ) {
     await this._assertTutorOwnsLessonIfNeeded(request, id);
     if (updateLessonDto.course?.id) {
-      await this._assertTutorOwnsCourseIfNeeded(request, updateLessonDto.course.id);
+      await this._assertTutorOwnsCourseIfNeeded(
+        request,
+        updateLessonDto.course.id,
+      );
     }
     return this.lessonsService.update(id, updateLessonDto);
   }

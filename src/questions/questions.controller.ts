@@ -56,7 +56,10 @@ export class QuestionsController {
   @ApiCreatedResponse({
     type: Question,
   })
-  async create(@Request() request, @Body() createQuestionDto: CreateQuestionDto) {
+  async create(
+    @Request() request,
+    @Body() createQuestionDto: CreateQuestionDto,
+  ) {
     await this._assertPlacementQuestionRulesForCreate(
       request,
       createQuestionDto.quiz.id,
@@ -128,7 +131,11 @@ export class QuestionsController {
     id: string,
     updateQuestionDto: UpdateQuestionDto,
   ) {
-    await this._assertPlacementQuestionRulesForUpdate(request, id, updateQuestionDto);
+    await this._assertPlacementQuestionRulesForUpdate(
+      request,
+      id,
+      updateQuestionDto,
+    );
     return this.questionsService.update(id, updateQuestionDto);
   }
 
@@ -152,7 +159,8 @@ export class QuestionsController {
     request,
     quizId: string,
   ): Promise<void> {
-    const isPlacementQuiz = await this.quizzesService.isPlacementQuizById(quizId);
+    const isPlacementQuiz =
+      await this.quizzesService.isPlacementQuizById(quizId);
     if (!isPlacementQuiz) {
       return;
     }
@@ -186,7 +194,8 @@ export class QuestionsController {
       existingQuestion.quiz.id,
     );
     const targetQuizId = updateQuestionDto.quiz?.id ?? existingQuestion.quiz.id;
-    const isTargetPlacement = await this.quizzesService.isPlacementQuizById(targetQuizId);
+    const isTargetPlacement =
+      await this.quizzesService.isPlacementQuizById(targetQuizId);
 
     if (!isCurrentPlacement && !isTargetPlacement) {
       return;
@@ -204,7 +213,8 @@ export class QuestionsController {
     }
 
     if (!isCurrentPlacement && isTargetPlacement) {
-      const targetQuestions = await this.quizzesService.getQuestionsByQuizId(targetQuizId);
+      const targetQuestions =
+        await this.quizzesService.getQuestionsByQuizId(targetQuizId);
       if (targetQuestions.length >= 50) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,

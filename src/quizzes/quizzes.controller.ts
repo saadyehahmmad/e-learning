@@ -232,7 +232,8 @@ export class QuizzesController {
     request,
     quizId: string,
   ): Promise<void> {
-    const isPlacementQuiz = await this.quizzesService.isPlacementQuizById(quizId);
+    const isPlacementQuiz =
+      await this.quizzesService.isPlacementQuizById(quizId);
     if (!isPlacementQuiz) {
       return;
     }

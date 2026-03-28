@@ -14,6 +14,8 @@ export class AddBookingMeetingFields1774901000000 implements MigrationInterface 
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "booking" DROP COLUMN "meetingLink"`);
-    await queryRunner.query(`ALTER TABLE "booking" DROP COLUMN "meetingProvider"`);
+    await queryRunner.query(
+      `ALTER TABLE "booking" DROP COLUMN "meetingProvider"`,
+    );
   }
 }

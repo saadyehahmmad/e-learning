@@ -53,7 +53,9 @@ export class CoursesController {
   create(@Request() request, @Body() createCourseDto: CreateCourseDto) {
     const actorRoleId = Number(request.user?.role?.id);
     if (actorRoleId === RoleEnum.tutor) {
-      createCourseDto.tutor = { id: request.user.id } as CreateCourseDto['tutor'];
+      createCourseDto.tutor = {
+        id: request.user.id,
+      } as CreateCourseDto['tutor'];
     }
 
     return this.coursesService.create(createCourseDto);
@@ -116,7 +118,9 @@ export class CoursesController {
 
     const actorRoleId = Number(request.user?.role?.id);
     if (actorRoleId === RoleEnum.tutor && updateCourseDto.tutor) {
-      updateCourseDto.tutor = { id: request.user.id } as UpdateCourseDto['tutor'];
+      updateCourseDto.tutor = {
+        id: request.user.id,
+      } as UpdateCourseDto['tutor'];
     }
 
     return this.coursesService.update(id, updateCourseDto);

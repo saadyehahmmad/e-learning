@@ -49,8 +49,12 @@ export class QuizRelationalRepository implements QuizRepository {
       .createQueryBuilder('quiz')
       .leftJoinAndSelect('quiz.course', 'course')
       .leftJoinAndSelect('course.tutor', 'tutor')
-      .where('LOWER(quiz.title) = :exactTitle', { exactTitle: 'placement test' })
-      .orWhere('LOWER(quiz.title) LIKE :partialTitle', { partialTitle: '%placement%' })
+      .where('LOWER(quiz.title) = :exactTitle', {
+        exactTitle: 'placement test',
+      })
+      .orWhere('LOWER(quiz.title) LIKE :partialTitle', {
+        partialTitle: '%placement%',
+      })
       .orderBy('quiz.createdAt', 'DESC')
       .getOne();
 

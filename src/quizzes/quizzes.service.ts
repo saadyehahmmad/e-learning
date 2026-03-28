@@ -105,7 +105,10 @@ export class QuizzesService {
    * Returns a student's answers for a given quiz.
    */
   getAnswersByQuizIdAndStudentId(quizId: string, studentId: number) {
-    return this.studentAnswerRepository.findByQuizIdAndStudentId(quizId, studentId);
+    return this.studentAnswerRepository.findByQuizIdAndStudentId(
+      quizId,
+      studentId,
+    );
   }
 
   /**
@@ -124,7 +127,10 @@ export class QuizzesService {
    */
   async hasStudentAttempt(quizId: string, studentId: number): Promise<boolean> {
     const existingAttempt =
-      await this.studentAnswerRepository.findByQuizIdAndStudentId(quizId, studentId);
+      await this.studentAnswerRepository.findByQuizIdAndStudentId(
+        quizId,
+        studentId,
+      );
     return existingAttempt.length > 0;
   }
 
@@ -226,7 +232,10 @@ export class QuizzesService {
         });
       }
       const existingAttempt =
-        await this.studentAnswerRepository.findByQuizIdAndStudentId(quizId, studentId);
+        await this.studentAnswerRepository.findByQuizIdAndStudentId(
+          quizId,
+          studentId,
+        );
       if (existingAttempt.length) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
@@ -255,7 +264,10 @@ export class QuizzesService {
           },
         });
       }
-      if (this._isPlacementQuiz(quiz.title) && !this._hasAnswerContent(submittedAnswer.answer)) {
+      if (
+        this._isPlacementQuiz(quiz.title) &&
+        !this._hasAnswerContent(submittedAnswer.answer)
+      ) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
           errors: {
@@ -343,9 +355,11 @@ export class QuizzesService {
       return true;
     }
 
-    return raw
-      .split('||')
-      .map((value) => value.trim())
-      .filter(Boolean).length > 0;
+    return (
+      raw
+        .split('||')
+        .map((value) => value.trim())
+        .filter(Boolean).length > 0
+    );
   }
 }

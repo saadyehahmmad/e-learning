@@ -62,7 +62,9 @@ export class EnrollmentsController {
     const actorId = request.user?.id;
 
     if (actorRoleId === RoleEnum.tutor) {
-      const course = await this.coursesService.findById(createEnrollmentDto.course.id);
+      const course = await this.coursesService.findById(
+        createEnrollmentDto.course.id,
+      );
       if (!course || String(course.tutor?.id) !== String(actorId)) {
         throw new ForbiddenException(
           'Tutors can only assign students to their own courses.',
@@ -156,7 +158,10 @@ export class EnrollmentsController {
         const targetCourse = await this.coursesService.findById(
           updateEnrollmentDto.course.id,
         );
-        if (!targetCourse || String(targetCourse.tutor?.id) !== String(actorId)) {
+        if (
+          !targetCourse ||
+          String(targetCourse.tutor?.id) !== String(actorId)
+        ) {
           throw new ForbiddenException(
             'Tutors can only reassign enrollments to their own courses.',
           );
