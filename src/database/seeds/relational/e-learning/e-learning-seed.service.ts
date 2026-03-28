@@ -63,7 +63,7 @@ export class ELearningSeedService {
       title: 'English Foundations A1',
       description: 'Beginner grammar, vocabulary, and speaking confidence.',
       level: 'A1',
-      price: 50,
+      price: 49.99,
       tutor,
     });
     const courseB = await this.ensureCourse({
