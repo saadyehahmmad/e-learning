@@ -8,6 +8,42 @@ const idType = Number;
 
 export class User {
   @ApiProperty({
+    type: () => String,
+    nullable: true,
+  })
+  englishLevel?: string | null;
+
+  @ApiProperty({
+    type: () => String,
+    nullable: true,
+  })
+  learningGoals?: string | null;
+
+  @ApiProperty({
+    type: () => String,
+    nullable: true,
+  })
+  certifications?: string | null;
+
+  @ApiProperty({
+    type: () => String,
+    nullable: true,
+  })
+  spokenLanguages?: string | null;
+
+  @ApiProperty({
+    type: () => Number,
+    nullable: true,
+  })
+  hourlyRate?: number | null;
+
+  @ApiProperty({
+    type: () => String,
+    nullable: true,
+  })
+  bio?: string | null;
+
+  @ApiProperty({
     type: idType,
   })
   id: number | string;

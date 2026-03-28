@@ -116,6 +116,18 @@ export class UsersService {
     return this.usersRepository.create({
       // Do not remove comment below.
       // <creating-property-payload />
+      englishLevel: createUserDto.englishLevel,
+
+      learningGoals: createUserDto.learningGoals,
+
+      certifications: createUserDto.certifications,
+
+      spokenLanguages: createUserDto.spokenLanguages,
+
+      hourlyRate: createUserDto.hourlyRate,
+
+      bio: createUserDto.bio,
+
       firstName: createUserDto.firstName,
       lastName: createUserDto.lastName,
       email: email,
@@ -171,7 +183,7 @@ export class UsersService {
 
   async update(
     id: User['id'],
-    updateUserDto: UpdateUserDto,
+    updateUserDto: UpdateUserDto | User,
   ): Promise<User | null> {
     // Do not remove comment below.
     // <updating-property />
@@ -270,6 +282,18 @@ export class UsersService {
     return this.usersRepository.update(id, {
       // Do not remove comment below.
       // <updating-property-payload />
+      englishLevel: updateUserDto.englishLevel,
+
+      learningGoals: updateUserDto.learningGoals,
+
+      certifications: updateUserDto.certifications,
+
+      spokenLanguages: updateUserDto.spokenLanguages,
+
+      hourlyRate: updateUserDto.hourlyRate,
+
+      bio: updateUserDto.bio,
+
       firstName: updateUserDto.firstName,
       lastName: updateUserDto.lastName,
       email,

@@ -11,8 +11,15 @@ export class FileMapper {
 
   static toPersistence(domainEntity: FileType): FileEntity {
     const persistenceEntity = new FileEntity();
-    persistenceEntity.id = domainEntity.id;
-    persistenceEntity.path = domainEntity.path;
+
+    if (domainEntity.id) {
+      persistenceEntity.id = domainEntity.id;
+    }
+
+    if (domainEntity.path) {
+      persistenceEntity.path = domainEntity.path;
+    }
+
     return persistenceEntity;
   }
 }

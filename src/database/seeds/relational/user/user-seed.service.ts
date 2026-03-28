@@ -15,64 +15,68 @@ export class UserSeedService {
   ) {}
 
   async run() {
-    const countAdmin = await this.repository.count({
-      where: {
-        role: {
-          id: RoleEnum.admin,
-        },
+    const usersToSeed = [
+      {
+        firstName: 'Super',
+        lastName: 'Admin',
+        email: 'admin@example.com',
+        roleId: RoleEnum.admin,
+        roleName: 'Admin',
       },
-    });
-
-    if (!countAdmin) {
-      const salt = await bcrypt.genSalt();
-      const password = await bcrypt.hash('secret', salt);
-
-      await this.repository.save(
-        this.repository.create({
-          firstName: 'Super',
-          lastName: 'Admin',
-          email: 'admin@example.com',
-          password,
-          role: {
-            id: RoleEnum.admin,
-            name: 'Admin',
-          },
-          status: {
-            id: StatusEnum.active,
-            name: 'Active',
-          },
-        }),
-      );
-    }
-
-    const countUser = await this.repository.count({
-      where: {
-        role: {
-          id: RoleEnum.user,
-        },
+      {
+        firstName: 'Jane',
+        lastName: 'Tutor',
+        email: 'jane.tutor@example.com',
+        roleId: RoleEnum.tutor,
+        roleName: 'Tutor',
+        bio: 'Certified English tutor focused on speaking confidence.',
+        hourlyRate: 25,
+        spokenLanguages: 'English,Arabic',
+        certifications: 'TESOL,IELTS',
       },
-    });
+      {
+        firstName: 'John',
+        lastName: 'Student',
+        email: 'john.student@example.com',
+        roleId: RoleEnum.student,
+        roleName: 'Student',
+        learningGoals: 'Improve speaking and business writing',
+        englishLevel: 'A2',
+      },
+    ];
 
-    if (!countUser) {
-      const salt = await bcrypt.genSalt();
-      const password = await bcrypt.hash('secret', salt);
+    const salt = await bcrypt.genSalt();
+    const password = await bcrypt.hash('secret', salt);
 
-      await this.repository.save(
-        this.repository.create({
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'john.doe@example.com',
-          password,
-          role: {
-            id: RoleEnum.user,
-            name: 'Admin',
-          },
-          status: {
-            id: StatusEnum.active,
-            name: 'Active',
-          },
-        }),
-      );
+    for (const user of usersToSeed) {
+      const count = await this.repository.count({
+        where: { role: { id: user.roleId } },
+      });
+
+      if (!count) {
+        await this.repository.save(
+          this.repository.create({
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            password,
+            bio: user.bio,
+            hourlyRate: user.hourlyRate,
+            spokenLanguages: user.spokenLanguages,
+            certifications: user.certifications,
+            learningGoals: user.learningGoals,
+            englishLevel: user.englishLevel,
+            role: {
+              id: user.roleId,
+              name: user.roleName,
+            },
+            status: {
+              id: StatusEnum.active,
+              name: 'Active',
+            },
+          }),
+        );
+      }
     }
   }
 }

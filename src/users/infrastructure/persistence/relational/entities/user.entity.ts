@@ -21,6 +21,42 @@ import { EntityRelationalHelper } from '../../../../../utils/relational-entity-h
   name: 'user',
 })
 export class UserEntity extends EntityRelationalHelper {
+  @Column({
+    nullable: true,
+    type: String,
+  })
+  englishLevel?: string | null;
+
+  @Column({
+    nullable: true,
+    type: String,
+  })
+  learningGoals?: string | null;
+
+  @Column({
+    nullable: true,
+    type: String,
+  })
+  certifications?: string | null;
+
+  @Column({
+    nullable: true,
+    type: String,
+  })
+  spokenLanguages?: string | null;
+
+  @Column({
+    nullable: true,
+    type: Number,
+  })
+  hourlyRate?: number | null;
+
+  @Column({
+    nullable: true,
+    type: String,
+  })
+  bio?: string | null;
+
   @PrimaryGeneratedColumn()
   id: number;
 

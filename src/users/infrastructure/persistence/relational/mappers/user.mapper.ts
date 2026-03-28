@@ -1,4 +1,5 @@
 import { FileEntity } from '../../../../../files/infrastructure/persistence/relational/entities/file.entity';
+
 import { FileMapper } from '../../../../../files/infrastructure/persistence/relational/mappers/file.mapper';
 import { RoleEntity } from '../../../../../roles/infrastructure/persistence/relational/entities/role.entity';
 import { StatusEntity } from '../../../../../statuses/infrastructure/persistence/relational/entities/status.entity';
@@ -8,6 +9,18 @@ import { UserEntity } from '../entities/user.entity';
 export class UserMapper {
   static toDomain(raw: UserEntity): User {
     const domainEntity = new User();
+    domainEntity.englishLevel = raw.englishLevel;
+
+    domainEntity.learningGoals = raw.learningGoals;
+
+    domainEntity.certifications = raw.certifications;
+
+    domainEntity.spokenLanguages = raw.spokenLanguages;
+
+    domainEntity.hourlyRate = raw.hourlyRate;
+
+    domainEntity.bio = raw.bio;
+
     domainEntity.id = raw.id;
     domainEntity.email = raw.email;
     domainEntity.password = raw.password;
@@ -38,8 +51,14 @@ export class UserMapper {
 
     if (domainEntity.photo) {
       photo = new FileEntity();
-      photo.id = domainEntity.photo.id;
-      photo.path = domainEntity.photo.path;
+
+      if (domainEntity.photo.id) {
+        photo.id = domainEntity.photo.id;
+      }
+
+      if (domainEntity.photo.path) {
+        photo.path = domainEntity.photo.path;
+      }
     } else if (domainEntity.photo === null) {
       photo = null;
     }
@@ -52,6 +71,18 @@ export class UserMapper {
     }
 
     const persistenceEntity = new UserEntity();
+    persistenceEntity.englishLevel = domainEntity.englishLevel;
+
+    persistenceEntity.learningGoals = domainEntity.learningGoals;
+
+    persistenceEntity.certifications = domainEntity.certifications;
+
+    persistenceEntity.spokenLanguages = domainEntity.spokenLanguages;
+
+    persistenceEntity.hourlyRate = domainEntity.hourlyRate;
+
+    persistenceEntity.bio = domainEntity.bio;
+
     if (domainEntity.id && typeof domainEntity.id === 'number') {
       persistenceEntity.id = domainEntity.id;
     }
