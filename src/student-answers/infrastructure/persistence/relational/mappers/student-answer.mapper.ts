@@ -1,8 +1,6 @@
 import { StudentAnswer } from '../../../../domain/student-answer';
 
-import { QuizMapper } from '../../../../../quizzes/infrastructure/persistence/relational/mappers/quiz.mapper';
-
-import { QuestionMapper } from '../../../../../questions/infrastructure/persistence/relational/mappers/question.mapper';
+import { PlacementMapper } from '../../../../../placement/infrastructure/persistence/relational/mappers/placement.mapper';
 
 import { UserMapper } from '../../../../../users/infrastructure/persistence/relational/mappers/user.mapper';
 
@@ -17,13 +15,11 @@ export class StudentAnswerMapper {
 
     domainEntity.answer = raw.answer;
 
-    if (raw.quiz) {
-      domainEntity.quiz = QuizMapper.toDomain(raw.quiz);
+    if (raw.placement) {
+      domainEntity.placement = PlacementMapper.toDomain(raw.placement);
     }
 
-    if (raw.question) {
-      domainEntity.question = QuestionMapper.toDomain(raw.question);
-    }
+    domainEntity.questionId = raw.questionId;
 
     if (raw.student) {
       domainEntity.student = UserMapper.toDomain(raw.student);
@@ -44,15 +40,13 @@ export class StudentAnswerMapper {
 
     persistenceEntity.answer = domainEntity.answer;
 
-    if (domainEntity.quiz) {
-      persistenceEntity.quiz = QuizMapper.toPersistence(domainEntity.quiz);
-    }
-
-    if (domainEntity.question) {
-      persistenceEntity.question = QuestionMapper.toPersistence(
-        domainEntity.question,
+    if (domainEntity.placement) {
+      persistenceEntity.placement = PlacementMapper.toPersistence(
+        domainEntity.placement,
       );
     }
+
+    persistenceEntity.questionId = domainEntity.questionId;
 
     if (domainEntity.student) {
       persistenceEntity.student = UserMapper.toPersistence(

@@ -1,5 +1,4 @@
-import { Quiz } from '../../quizzes/domain/quiz';
-import { Question } from '../../questions/domain/question';
+import { Placement } from '../../placement/domain/placement';
 import { User } from '../../users/domain/user';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -23,16 +22,15 @@ export class StudentAnswer {
   answer: string;
 
   @ApiProperty({
-    type: () => Quiz,
+    type: () => Placement,
     nullable: false,
   })
-  quiz: Quiz;
+  placement: Placement;
 
   @ApiProperty({
-    type: () => Question,
-    nullable: false,
+    description: 'Question id inside placement.questions JSON',
   })
-  question: Question;
+  questionId: string;
 
   @ApiProperty({
     type: () => User,

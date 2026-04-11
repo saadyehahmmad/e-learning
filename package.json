@@ -12,6 +12,7 @@
     "migration:create": "npm run typeorm -- migration:create",
     "migration:run": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:run",
     "migration:revert": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:revert",
+    "db:migrate-and-seed": "npm run migration:run && npm run seed:run:relational",
     "schema:drop": "npm run typeorm -- --dataSource=src/database/data-source.ts schema:drop",
     "seed:create:relational": "hygen seeds create-relational",
     "generate:resource:relational": "hygen generate relational-resource",

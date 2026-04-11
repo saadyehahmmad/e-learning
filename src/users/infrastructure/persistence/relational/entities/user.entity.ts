@@ -13,50 +13,14 @@ import {
 import { RoleEntity } from '../../../../../roles/infrastructure/persistence/relational/entities/role.entity';
 import { StatusEntity } from '../../../../../statuses/infrastructure/persistence/relational/entities/status.entity';
 import { FileEntity } from '../../../../../files/infrastructure/persistence/relational/entities/file.entity';
+import { StudentGroupEntity } from '../../../../../student-groups/infrastructure/persistence/relational/entities/student-group.entity';
 
-import { AuthProvidersEnum } from '../../../../../auth/auth-providers.enum';
 import { EntityRelationalHelper } from '../../../../../utils/relational-entity-helper';
 
 @Entity({
   name: 'user',
 })
 export class UserEntity extends EntityRelationalHelper {
-  @Column({
-    nullable: true,
-    type: String,
-  })
-  englishLevel?: string | null;
-
-  @Column({
-    nullable: true,
-    type: String,
-  })
-  learningGoals?: string | null;
-
-  @Column({
-    nullable: true,
-    type: String,
-  })
-  certifications?: string | null;
-
-  @Column({
-    nullable: true,
-    type: String,
-  })
-  spokenLanguages?: string | null;
-
-  @Column({
-    nullable: true,
-    type: Number,
-  })
-  hourlyRate?: number | null;
-
-  @Column({
-    nullable: true,
-    type: String,
-  })
-  bio?: string | null;
-
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -68,13 +32,6 @@ export class UserEntity extends EntityRelationalHelper {
   @Column({ nullable: true })
   password?: string;
 
-  @Column({ default: AuthProvidersEnum.email })
-  provider: string;
-
-  @Index()
-  @Column({ type: String, nullable: true })
-  socialId?: string | null;
-
   @Index()
   @Column({ type: String, nullable: true })
   firstName: string | null;
@@ -84,20 +41,36 @@ export class UserEntity extends EntityRelationalHelper {
   lastName: string | null;
 
   @OneToOne(() => FileEntity, {
-    eager: true,
+    eager: false,
   })
   @JoinColumn()
   photo?: FileEntity | null;
 
   @ManyToOne(() => RoleEntity, {
-    eager: true,
+    eager: false,
   })
   role?: RoleEntity | null;
 
   @ManyToOne(() => StatusEntity, {
-    eager: true,
+    eager: false,
   })
   status?: StatusEntity;
+
+  @ManyToOne(() => StudentGroupEntity, {
+    eager: false,
+    nullable: true,
+  })
+  @JoinColumn()
+  group?: StudentGroupEntity | null;
+
+  @Column({ type: 'text', nullable: true })
+  adminNotes?: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  nextPaymentDate?: Date | null;
+
+  @Column({ type: 'double precision', nullable: true })
+  nextPaymentAmount?: number | null;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -29,7 +29,10 @@ SECRET_ACCESS_KEY=
 AWS_S3_REGION=
 AWS_DEFAULT_S3_BUCKET=
 
-MAIL_HOST=maildev
+# true = no SMTP (registration works on localhost without Docker Maildev). false = use MAIL_HOST.
+MAIL_DISABLED=true
+# If MAIL_DISABLED=false: use localhost when Maildev ports are published to the host; use maildev only if the API runs in the same Docker network as the maildev service.
+MAIL_HOST=localhost
 MAIL_PORT=1025
 MAIL_USER=
 MAIL_PASSWORD=

@@ -1,7 +1,5 @@
 import { UserEntity } from '../../../../../users/infrastructure/persistence/relational/entities/user.entity';
 
-import { EnrollmentEntity } from '../../../../../enrollments/infrastructure/persistence/relational/entities/enrollment.entity';
-
 import {
   CreateDateColumn,
   Entity,
@@ -48,9 +46,6 @@ export class PaymentEntity extends EntityRelationalHelper {
 
   @ManyToOne(() => UserEntity, { eager: true, nullable: false })
   student: UserEntity;
-
-  @ManyToOne(() => EnrollmentEntity, { eager: true, nullable: false })
-  enrollment: EnrollmentEntity;
 
   @PrimaryGeneratedColumn('uuid')
   id: string;

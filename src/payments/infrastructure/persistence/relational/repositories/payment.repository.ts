@@ -63,6 +63,18 @@ export class PaymentRelationalRepository implements PaymentRepository {
       order: {
         createdAt: 'DESC',
       },
+      /** Avoid eager-loading the same student row on every payment row. */
+      loadEagerRelations: false,
+    });
+
+    return entities.map((entity) => PaymentMapper.toDomain(entity));
+  }
+
+  async findAllByStudentId(studentId: number): Promise<Payment[]> {
+    const entities = await this.paymentRepository.find({
+      where: { student: { id: studentId } },
+      order: { paidAt: 'DESC', createdAt: 'DESC' },
+      loadEagerRelations: false,
     });
 
     return entities.map((entity) => PaymentMapper.toDomain(entity));

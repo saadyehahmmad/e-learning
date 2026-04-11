@@ -23,6 +23,11 @@ export abstract class PaymentRepository {
     paginationOptions: IPaginationOptions,
   ): Promise<Payment[]>;
 
+  /**
+   * All payments for a student (admin roster / profile).
+   */
+  abstract findAllByStudentId(studentId: number): Promise<Payment[]>;
+
   abstract update(
     id: Payment['id'],
     payload: DeepPartial<Payment>,

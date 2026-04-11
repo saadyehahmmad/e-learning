@@ -22,6 +22,8 @@ export class SessionRelationalRepository implements SessionRepository {
       where: {
         id: Number(id),
       },
+      relations: ['user', 'user.role'],
+      loadEagerRelations: false,
     });
 
     return entity ? SessionMapper.toDomain(entity) : null;
@@ -29,9 +31,14 @@ export class SessionRelationalRepository implements SessionRepository {
 
   async create(data: Session): Promise<Session> {
     const persistenceModel = SessionMapper.toPersistence(data);
-    return this.sessionRepository.save(
+    const saved = await this.sessionRepository.save(
       this.sessionRepository.create(persistenceModel),
     );
+    const reloaded = await this.findById(saved.id);
+    if (!reloaded) {
+      throw new Error('Session not found after create');
+    }
+    return reloaded;
   }
 
   async update(
@@ -42,6 +49,8 @@ export class SessionRelationalRepository implements SessionRepository {
   ): Promise<Session | null> {
     const entity = await this.sessionRepository.findOne({
       where: { id: Number(id) },
+      relations: ['user', 'user.role'],
+      loadEagerRelations: false,
     });
 
     if (!entity) {
@@ -57,7 +66,7 @@ export class SessionRelationalRepository implements SessionRepository {
       ),
     );
 
-    return SessionMapper.toDomain(updatedEntity);
+    return this.findById(updatedEntity.id);
   }
 
   async updateByHash(
@@ -77,6 +86,8 @@ export class SessionRelationalRepository implements SessionRepository {
 
     const entity = await this.sessionRepository.findOne({
       where: { id: Number(conditions.id) },
+      relations: ['user', 'user.role'],
+      loadEagerRelations: false,
     });
 
     return entity ? SessionMapper.toDomain(entity) : null;

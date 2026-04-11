@@ -1,5 +1,4 @@
 import { User } from '../../users/domain/user';
-import { Enrollment } from '../../enrollments/domain/enrollment';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class Payment {
@@ -38,12 +37,6 @@ export class Payment {
     nullable: false,
   })
   student: User;
-
-  @ApiProperty({
-    type: () => Enrollment,
-    nullable: false,
-  })
-  enrollment: Enrollment;
 
   @ApiProperty({
     type: String,

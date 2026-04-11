@@ -9,7 +9,6 @@ import { FilterUserDto, SortUserDto } from './dto/query-user.dto';
 import { UserRepository } from './infrastructure/persistence/user.repository';
 import { User } from './domain/user';
 import bcrypt from 'bcryptjs';
-import { AuthProvidersEnum } from '../auth/auth-providers.enum';
 import { FilesService } from '../files/files.service';
 import { RoleEnum } from '../roles/roles.enum';
 import { StatusEnum } from '../statuses/statuses.enum';
@@ -18,6 +17,7 @@ import { FileType } from '../files/domain/file';
 import { Role } from '../roles/domain/role';
 import { Status } from '../statuses/domain/status';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { normalizeStoredGroupId } from '../utils/group-id.util';
 
 @Injectable()
 export class UsersService {
@@ -113,21 +113,15 @@ export class UsersService {
       };
     }
 
+    let group: User['group'] | undefined = undefined;
+    if (createUserDto.groupId !== undefined) {
+      const raw = normalizeStoredGroupId(createUserDto.groupId);
+      group = raw ? { id: raw } : null;
+    }
+
     return this.usersRepository.create({
       // Do not remove comment below.
       // <creating-property-payload />
-      englishLevel: createUserDto.englishLevel,
-
-      learningGoals: createUserDto.learningGoals,
-
-      certifications: createUserDto.certifications,
-
-      spokenLanguages: createUserDto.spokenLanguages,
-
-      hourlyRate: createUserDto.hourlyRate,
-
-      bio: createUserDto.bio,
-
       firstName: createUserDto.firstName,
       lastName: createUserDto.lastName,
       email: email,
@@ -135,8 +129,10 @@ export class UsersService {
       photo: photo,
       role: role,
       status: status,
-      provider: createUserDto.provider ?? AuthProvidersEnum.email,
-      socialId: createUserDto.socialId,
+      group,
+      adminNotes: createUserDto.adminNotes ?? null,
+      nextPaymentDate: createUserDto.nextPaymentDate ?? null,
+      nextPaymentAmount: createUserDto.nextPaymentAmount ?? null,
     });
   }
 
@@ -166,19 +162,6 @@ export class UsersService {
 
   findByEmail(email: User['email']): Promise<NullableType<User>> {
     return this.usersRepository.findByEmail(email);
-  }
-
-  findBySocialIdAndProvider({
-    socialId,
-    provider,
-  }: {
-    socialId: User['socialId'];
-    provider: User['provider'];
-  }): Promise<NullableType<User>> {
-    return this.usersRepository.findBySocialIdAndProvider({
-      socialId,
-      provider,
-    });
   }
 
   async update(
@@ -279,21 +262,15 @@ export class UsersService {
       };
     }
 
+    let group: User['group'] | undefined = undefined;
+    if ('groupId' in updateUserDto && updateUserDto.groupId !== undefined) {
+      const raw = normalizeStoredGroupId(updateUserDto.groupId);
+      group = raw ? { id: raw } : null;
+    }
+
     return this.usersRepository.update(id, {
       // Do not remove comment below.
       // <updating-property-payload />
-      englishLevel: updateUserDto.englishLevel,
-
-      learningGoals: updateUserDto.learningGoals,
-
-      certifications: updateUserDto.certifications,
-
-      spokenLanguages: updateUserDto.spokenLanguages,
-
-      hourlyRate: updateUserDto.hourlyRate,
-
-      bio: updateUserDto.bio,
-
       firstName: updateUserDto.firstName,
       lastName: updateUserDto.lastName,
       email,
@@ -301,8 +278,21 @@ export class UsersService {
       photo,
       role,
       status,
-      provider: updateUserDto.provider,
-      socialId: updateUserDto.socialId,
+      ...('groupId' in updateUserDto && updateUserDto.groupId !== undefined
+        ? { group }
+        : {}),
+      ...('adminNotes' in updateUserDto &&
+      updateUserDto.adminNotes !== undefined
+        ? { adminNotes: updateUserDto.adminNotes }
+        : {}),
+      ...('nextPaymentDate' in updateUserDto &&
+      updateUserDto.nextPaymentDate !== undefined
+        ? { nextPaymentDate: updateUserDto.nextPaymentDate }
+        : {}),
+      ...('nextPaymentAmount' in updateUserDto &&
+      updateUserDto.nextPaymentAmount !== undefined
+        ? { nextPaymentAmount: updateUserDto.nextPaymentAmount }
+        : {}),
     });
   }
 

@@ -1,7 +1,5 @@
 import { UserDto } from '../../users/dto/user.dto';
 
-import { EnrollmentDto } from '../../enrollments/dto/enrollment.dto';
-
 import {
   // decorators here
   Type,
@@ -71,15 +69,6 @@ export class CreatePaymentDto {
   @Type(() => UserDto)
   @IsNotEmptyObject()
   student: UserDto;
-
-  @ApiProperty({
-    required: true,
-    type: () => EnrollmentDto,
-  })
-  @ValidateNested()
-  @Type(() => EnrollmentDto)
-  @IsNotEmptyObject()
-  enrollment: EnrollmentDto;
 
   // Don't forget to use the class-validator decorators in the DTO properties.
 }

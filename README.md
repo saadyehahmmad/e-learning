@@ -1,10 +1,8 @@
 # NestJS E-Learning Platform
 
-A NestJS backend for an English E-Learning platform with:
-- self-paced courses (courses, lessons, enrollments, quizzes),
-- live tutoring (availability, bookings),
-- engagement (reviews),
-- payments,
+A NestJS backend for an English learning platform with:
+- placement testing (single placement aggregate + embedded questions),
+- student groups, roster, and payments,
 - authentication, sessions, file upload, and RBAC.
 
 ## Tech Stack
@@ -18,11 +16,8 @@ A NestJS backend for an English E-Learning platform with:
 ## Main Modules
 
 - `auth`, `users`, `roles`, `statuses`, `session`, `files`
-- `courses`, `lessons`, `enrollments`
-- `availabilities`, `bookings`
-- `reviews`
-- `quizzes`, `questions`, `student-answers`
-- `payments`
+- `placement`, `student-answers`
+- `student-groups`, `payments`, `admin`
 
 ## Architecture Overview
 
@@ -38,14 +33,9 @@ A NestJS backend for an English E-Learning platform with:
 
 - **Admin**
   - full access to user/admin maintenance endpoints.
-- **Tutor**
-  - creates and manages courses/lessons,
-  - manages availability,
-  - can be part of booking workflows.
+- **Tutor** — reserved for future tutor workflows.
 - **Student**
-  - enrolls in courses,
-  - books tutoring sessions,
-  - submits quiz answers,
+  - completes the placement test and views hub data,
   - creates personal payments (`/payments/my`).
 
 > Role guard behavior depends on endpoint decorators and controller-level guards in each module.
@@ -58,27 +48,18 @@ Main route groups are exposed under versioned controllers (for example `/v1/...`
   - register, login, refresh, me, update me, logout.
 - `users`
   - user administration and profile data.
-- `courses`, `lessons`
-  - course catalog and lesson content.
-- `enrollments`
-  - student enrollment records and progress.
-- `availabilities`, `bookings`
-  - tutor schedule and live session bookings.
-- `reviews`
-  - learner feedback and ratings.
-- `quizzes`, `questions`, `student-answers`
-  - assessments and answer tracking.
+- `placement`, `student-answers`
+  - placement test content and submitted answers.
+- `student` (hub routes), `admin`
+  - learner and staff dashboards.
 - `payments`
   - general CRUD + student self-payment endpoints (`/payments/my`).
 
 ## Data and Domain Notes
 
-- User profile supports role-specific fields:
-  - tutor-focused: `bio`, `hourlyRate`, `spokenLanguages`, `certifications`
-  - student-focused: `learningGoals`, `englishLevel`
-- Quiz submission endpoint computes correctness per answer and stores `student_answer` records.
-- Payment rows are linked to both `student` and `enrollment`.
-- `options` in questions are currently persisted as a string (JSON string in seeded data).
+- Placement metadata and questions live on the `placement` row (`questions` JSONB).
+- Placement submit computes correctness per answer and stores `student_answer` rows.
+- Payment rows link to the student user (Fluentia-style monthly payments).
 
 ## Database Lifecycle
 

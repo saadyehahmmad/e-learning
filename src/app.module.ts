@@ -26,38 +26,22 @@ const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
   },
 });
 
-import { CoursesModule } from './courses/courses.module';
-
-import { LessonsModule } from './lessons/lessons.module';
-
-import { EnrollmentsModule } from './enrollments/enrollments.module';
-
-import { AvailabilitiesModule } from './availabilities/availabilities.module';
-
-import { BookingsModule } from './bookings/bookings.module';
-
-import { ReviewsModule } from './reviews/reviews.module';
-
-import { QuizzesModule } from './quizzes/quizzes.module';
-
-import { QuestionsModule } from './questions/questions.module';
+import { PlacementModule } from './placement/placement.module';
 
 import { StudentAnswersModule } from './student-answers/student-answers.module';
 
 import { PaymentsModule } from './payments/payments.module';
 
+import { AdminModule } from './admin/admin.module';
+import { StudentHubModule } from './student-hub/student-hub.module';
+
 @Module({
   imports: [
+    AdminModule,
+    StudentHubModule,
     PaymentsModule,
     StudentAnswersModule,
-    QuestionsModule,
-    QuizzesModule,
-    ReviewsModule,
-    BookingsModule,
-    AvailabilitiesModule,
-    EnrollmentsModule,
-    LessonsModule,
-    CoursesModule,
+    PlacementModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig, authConfig, appConfig, mailConfig, fileConfig],

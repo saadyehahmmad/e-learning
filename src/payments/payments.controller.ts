@@ -29,6 +29,7 @@ import {
 import { infinityPagination } from '../utils/infinity-pagination';
 import { FindAllPaymentsDto } from './dto/find-all-payments.dto';
 import { CreateMyPaymentDto } from './dto/create-my-payment.dto';
+import { PaymentStatusEnum } from './payment-status.enum';
 
 @ApiTags('Payments')
 @ApiBearerAuth()
@@ -56,10 +57,12 @@ export class PaymentsController {
     @Request() request,
     @Body() createMyPaymentDto: CreateMyPaymentDto,
   ) {
-    return this.paymentsService.createForStudent(
-      request.user.id,
-      createMyPaymentDto,
-    );
+    return this.paymentsService.createForStudent(request.user.id, {
+      amount: createMyPaymentDto.amount,
+      currency: createMyPaymentDto.currency,
+      status: PaymentStatusEnum.paid,
+      providerReference: createMyPaymentDto.providerReference ?? null,
+    });
   }
 
   @Get()

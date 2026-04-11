@@ -1,14 +1,10 @@
-import { QuizzesService } from '../quizzes/quizzes.service';
-import { Quiz } from '../quizzes/domain/quiz';
-
-import { QuestionsService } from '../questions/questions.service';
-import { Question } from '../questions/domain/question';
+import { PlacementService } from '../placement/placement.service';
+import { Placement } from '../placement/domain/placement';
 
 import { UsersService } from '../users/users.service';
 import { User } from '../users/domain/user';
 
 import {
-  // common
   Injectable,
   HttpStatus,
   UnprocessableEntityException,
@@ -22,37 +18,30 @@ import { StudentAnswer } from './domain/student-answer';
 @Injectable()
 export class StudentAnswersService {
   constructor(
-    private readonly quizService: QuizzesService,
-
-    private readonly questionService: QuestionsService,
-
+    private readonly placementService: PlacementService,
     private readonly userService: UsersService,
-
-    // Dependencies here
     private readonly studentAnswerRepository: StudentAnswerRepository,
   ) {}
 
   async create(createStudentAnswerDto: CreateStudentAnswerDto) {
-    // Do not remove comment below.
-    // <creating-property />
-
-    const quizObject = await this.quizService.findById(
-      createStudentAnswerDto.quiz.id,
+    const placementObject = await this.placementService.findById(
+      createStudentAnswerDto.placement.id,
     );
-    if (!quizObject) {
+    if (!placementObject) {
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
         errors: {
-          quiz: 'notExists',
+          placement: 'notExists',
         },
       });
     }
-    const quiz = quizObject;
+    const placement = placementObject;
 
-    const questionObject = await this.questionService.findById(
-      createStudentAnswerDto.question.id,
+    const question = await this.placementService.findQuestion(
+      placement.id,
+      createStudentAnswerDto.questionId,
     );
-    if (!questionObject) {
+    if (!question) {
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
         errors: {
@@ -60,7 +49,6 @@ export class StudentAnswersService {
         },
       });
     }
-    const question = questionObject;
 
     const studentObject = await this.userService.findById(
       createStudentAnswerDto.student.id,
@@ -76,18 +64,11 @@ export class StudentAnswersService {
     const student = studentObject;
 
     return this.studentAnswerRepository.create({
-      // Do not remove comment below.
-      // <creating-property-payload />
       submittedAt: createStudentAnswerDto.submittedAt,
-
       isCorrect: createStudentAnswerDto.isCorrect,
-
       answer: createStudentAnswerDto.answer,
-
-      quiz,
-
-      question,
-
+      placement,
+      questionId: question.id,
       student,
     });
   }
@@ -118,41 +99,21 @@ export class StudentAnswersService {
 
     updateStudentAnswerDto: UpdateStudentAnswerDto,
   ) {
-    // Do not remove comment below.
-    // <updating-property />
+    let placement: Placement | undefined = undefined;
 
-    let quiz: Quiz | undefined = undefined;
-
-    if (updateStudentAnswerDto.quiz) {
-      const quizObject = await this.quizService.findById(
-        updateStudentAnswerDto.quiz.id,
+    if (updateStudentAnswerDto.placement) {
+      const placementObject = await this.placementService.findById(
+        updateStudentAnswerDto.placement.id,
       );
-      if (!quizObject) {
+      if (!placementObject) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
           errors: {
-            quiz: 'notExists',
+            placement: 'notExists',
           },
         });
       }
-      quiz = quizObject;
-    }
-
-    let question: Question | undefined = undefined;
-
-    if (updateStudentAnswerDto.question) {
-      const questionObject = await this.questionService.findById(
-        updateStudentAnswerDto.question.id,
-      );
-      if (!questionObject) {
-        throw new UnprocessableEntityException({
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            question: 'notExists',
-          },
-        });
-      }
-      question = questionObject;
+      placement = placementObject;
     }
 
     let student: User | undefined = undefined;
@@ -173,18 +134,13 @@ export class StudentAnswersService {
     }
 
     return this.studentAnswerRepository.update(id, {
-      // Do not remove comment below.
-      // <updating-property-payload />
       submittedAt: updateStudentAnswerDto.submittedAt,
-
       isCorrect: updateStudentAnswerDto.isCorrect,
-
       answer: updateStudentAnswerDto.answer,
-
-      quiz,
-
-      question,
-
+      placement,
+      ...(updateStudentAnswerDto.questionId !== undefined
+        ? { questionId: updateStudentAnswerDto.questionId }
+        : {}),
       student,
     });
   }

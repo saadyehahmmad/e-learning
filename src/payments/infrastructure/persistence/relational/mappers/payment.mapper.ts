@@ -2,8 +2,6 @@ import { Payment } from '../../../../domain/payment';
 
 import { UserMapper } from '../../../../../users/infrastructure/persistence/relational/mappers/user.mapper';
 
-import { EnrollmentMapper } from '../../../../../enrollments/infrastructure/persistence/relational/mappers/enrollment.mapper';
-
 import { PaymentEntity } from '../entities/payment.entity';
 
 export class PaymentMapper {
@@ -21,10 +19,6 @@ export class PaymentMapper {
 
     if (raw.student) {
       domainEntity.student = UserMapper.toDomain(raw.student);
-    }
-
-    if (raw.enrollment) {
-      domainEntity.enrollment = EnrollmentMapper.toDomain(raw.enrollment);
     }
 
     domainEntity.id = raw.id;
@@ -49,12 +43,6 @@ export class PaymentMapper {
     if (domainEntity.student) {
       persistenceEntity.student = UserMapper.toPersistence(
         domainEntity.student,
-      );
-    }
-
-    if (domainEntity.enrollment) {
-      persistenceEntity.enrollment = EnrollmentMapper.toPersistence(
-        domainEntity.enrollment,
       );
     }
 

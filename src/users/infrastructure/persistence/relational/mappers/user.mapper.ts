@@ -1,4 +1,5 @@
 import { FileEntity } from '../../../../../files/infrastructure/persistence/relational/entities/file.entity';
+import { StudentGroupEntity } from '../../../../../student-groups/infrastructure/persistence/relational/entities/student-group.entity';
 
 import { FileMapper } from '../../../../../files/infrastructure/persistence/relational/mappers/file.mapper';
 import { RoleEntity } from '../../../../../roles/infrastructure/persistence/relational/entities/role.entity';
@@ -9,23 +10,9 @@ import { UserEntity } from '../entities/user.entity';
 export class UserMapper {
   static toDomain(raw: UserEntity): User {
     const domainEntity = new User();
-    domainEntity.englishLevel = raw.englishLevel;
-
-    domainEntity.learningGoals = raw.learningGoals;
-
-    domainEntity.certifications = raw.certifications;
-
-    domainEntity.spokenLanguages = raw.spokenLanguages;
-
-    domainEntity.hourlyRate = raw.hourlyRate;
-
-    domainEntity.bio = raw.bio;
-
     domainEntity.id = raw.id;
     domainEntity.email = raw.email;
     domainEntity.password = raw.password;
-    domainEntity.provider = raw.provider;
-    domainEntity.socialId = raw.socialId;
     domainEntity.firstName = raw.firstName;
     domainEntity.lastName = raw.lastName;
     if (raw.photo) {
@@ -33,6 +20,17 @@ export class UserMapper {
     }
     domainEntity.role = raw.role;
     domainEntity.status = raw.status;
+    if (raw.group) {
+      domainEntity.group = {
+        id: raw.group.id,
+        name: raw.group.name,
+      };
+    } else {
+      domainEntity.group = null;
+    }
+    domainEntity.adminNotes = raw.adminNotes;
+    domainEntity.nextPaymentDate = raw.nextPaymentDate;
+    domainEntity.nextPaymentAmount = raw.nextPaymentAmount;
     domainEntity.createdAt = raw.createdAt;
     domainEntity.updatedAt = raw.updatedAt;
     domainEntity.deletedAt = raw.deletedAt;
@@ -70,31 +68,29 @@ export class UserMapper {
       status.id = Number(domainEntity.status.id);
     }
 
+    let group: StudentGroupEntity | undefined | null = undefined;
+    if (domainEntity.group?.id) {
+      group = new StudentGroupEntity();
+      group.id = String(domainEntity.group.id);
+    } else if (domainEntity.group === null) {
+      group = null;
+    }
+
     const persistenceEntity = new UserEntity();
-    persistenceEntity.englishLevel = domainEntity.englishLevel;
-
-    persistenceEntity.learningGoals = domainEntity.learningGoals;
-
-    persistenceEntity.certifications = domainEntity.certifications;
-
-    persistenceEntity.spokenLanguages = domainEntity.spokenLanguages;
-
-    persistenceEntity.hourlyRate = domainEntity.hourlyRate;
-
-    persistenceEntity.bio = domainEntity.bio;
-
     if (domainEntity.id && typeof domainEntity.id === 'number') {
       persistenceEntity.id = domainEntity.id;
     }
     persistenceEntity.email = domainEntity.email;
     persistenceEntity.password = domainEntity.password;
-    persistenceEntity.provider = domainEntity.provider;
-    persistenceEntity.socialId = domainEntity.socialId;
     persistenceEntity.firstName = domainEntity.firstName;
     persistenceEntity.lastName = domainEntity.lastName;
     persistenceEntity.photo = photo;
     persistenceEntity.role = role;
     persistenceEntity.status = status;
+    persistenceEntity.group = group;
+    persistenceEntity.adminNotes = domainEntity.adminNotes;
+    persistenceEntity.nextPaymentDate = domainEntity.nextPaymentDate;
+    persistenceEntity.nextPaymentAmount = domainEntity.nextPaymentAmount;
     persistenceEntity.createdAt = domainEntity.createdAt;
     persistenceEntity.updatedAt = domainEntity.updatedAt;
     persistenceEntity.deletedAt = domainEntity.deletedAt;

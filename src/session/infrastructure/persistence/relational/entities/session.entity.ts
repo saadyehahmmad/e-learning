@@ -20,7 +20,7 @@ export class SessionEntity extends EntityRelationalHelper {
   id!: number;
 
   @ManyToOne(() => UserEntity, {
-    eager: true,
+    eager: false,
   })
   @Index()
   user!: UserEntity;

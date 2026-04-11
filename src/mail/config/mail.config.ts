@@ -8,17 +8,23 @@ import {
   IsOptional,
   IsBoolean,
   IsEmail,
+  ValidateIf,
 } from 'class-validator';
 import validateConfig from '../../utils/validate-config';
 import { MailConfig } from './mail-config.type';
 
 class EnvironmentVariablesValidator {
+  @IsOptional()
+  @IsString()
+  MAIL_DISABLED?: string;
+
   @IsInt()
   @Min(0)
   @Max(65535)
   @IsOptional()
   MAIL_PORT: number;
 
+  @ValidateIf((o: EnvironmentVariablesValidator) => o.MAIL_DISABLED !== 'true')
   @IsString()
   MAIL_HOST: string;
 
@@ -50,6 +56,7 @@ export default registerAs<MailConfig>('mail', () => {
   validateConfig(process.env, EnvironmentVariablesValidator);
 
   return {
+    disabled: process.env.MAIL_DISABLED === 'true',
     port: process.env.MAIL_PORT ? parseInt(process.env.MAIL_PORT, 10) : 587,
     host: process.env.MAIL_HOST,
     user: process.env.MAIL_USER,

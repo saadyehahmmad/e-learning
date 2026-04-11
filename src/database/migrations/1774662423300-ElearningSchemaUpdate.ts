@@ -35,20 +35,6 @@ export class ElearningSchemaUpdate1774662423300 implements MigrationInterface {
       `CREATE TABLE "availability" ("endTime" character varying NOT NULL, "startTime" character varying NOT NULL, "dayOfWeek" integer NOT NULL, "id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "tutorId" integer NOT NULL, CONSTRAINT "PK_05a8158cf1112294b1c86e7f1d3" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ADD "englishLevel" character varying`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user" ADD "learningGoals" character varying`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user" ADD "certifications" character varying`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user" ADD "spokenLanguages" character varying`,
-    );
-    await queryRunner.query(`ALTER TABLE "user" ADD "hourlyRate" integer`);
-    await queryRunner.query(`ALTER TABLE "user" ADD "bio" character varying`);
-    await queryRunner.query(
       `ALTER TABLE "course" ADD CONSTRAINT "FK_d0bf2b28f974f68f2b9e3e97274" FOREIGN KEY ("tutorId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
@@ -141,12 +127,6 @@ export class ElearningSchemaUpdate1774662423300 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "course" DROP CONSTRAINT "FK_d0bf2b28f974f68f2b9e3e97274"`,
     );
-    await queryRunner.query(`ALTER TABLE "user" DROP COLUMN "bio"`);
-    await queryRunner.query(`ALTER TABLE "user" DROP COLUMN "hourlyRate"`);
-    await queryRunner.query(`ALTER TABLE "user" DROP COLUMN "spokenLanguages"`);
-    await queryRunner.query(`ALTER TABLE "user" DROP COLUMN "certifications"`);
-    await queryRunner.query(`ALTER TABLE "user" DROP COLUMN "learningGoals"`);
-    await queryRunner.query(`ALTER TABLE "user" DROP COLUMN "englishLevel"`);
     await queryRunner.query(`DROP TABLE "availability"`);
     await queryRunner.query(`DROP TABLE "booking"`);
     await queryRunner.query(`DROP TABLE "review"`);

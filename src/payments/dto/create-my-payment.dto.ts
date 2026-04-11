@@ -3,13 +3,6 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateMyPaymentDto {
   @ApiProperty({
-    example: 'd8b9a3b8-8dba-4e7e-a4c8-fcd46b0575ec',
-  })
-  @IsString()
-  @IsNotEmpty()
-  enrollmentId: string;
-
-  @ApiProperty({
     example: 99.99,
   })
   @IsNumber()

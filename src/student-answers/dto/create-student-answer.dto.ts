@@ -1,26 +1,12 @@
-import { QuizDto } from '../../quizzes/dto/quiz.dto';
-
-import { QuestionDto } from '../../questions/dto/question.dto';
+import { PlacementDto } from '../../placement/dto/placement.dto';
 
 import { UserDto } from '../../users/dto/user.dto';
 
-import {
-  // decorators here
-  Type,
-} from 'class-transformer';
+import { Type } from 'class-transformer';
 
-import {
-  // decorators here
+import { ValidateNested, IsNotEmptyObject, IsString } from 'class-validator';
 
-  ValidateNested,
-  IsNotEmptyObject,
-  IsString,
-} from 'class-validator';
-
-import {
-  // decorators here
-  ApiProperty,
-} from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateStudentAnswerDto {
   submittedAt?: Date;
@@ -36,21 +22,19 @@ export class CreateStudentAnswerDto {
 
   @ApiProperty({
     required: true,
-    type: () => QuizDto,
+    type: () => PlacementDto,
   })
   @ValidateNested()
-  @Type(() => QuizDto)
+  @Type(() => PlacementDto)
   @IsNotEmptyObject()
-  quiz: QuizDto;
+  placement: PlacementDto;
 
   @ApiProperty({
     required: true,
-    type: () => QuestionDto,
+    description: 'Question id inside placement.questions',
   })
-  @ValidateNested()
-  @Type(() => QuestionDto)
-  @IsNotEmptyObject()
-  question: QuestionDto;
+  @IsString()
+  questionId: string;
 
   @ApiProperty({
     required: true,
@@ -60,6 +44,4 @@ export class CreateStudentAnswerDto {
   @Type(() => UserDto)
   @IsNotEmptyObject()
   student: UserDto;
-
-  // Don't forget to use the class-validator decorators in the DTO properties.
 }

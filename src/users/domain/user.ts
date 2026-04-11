@@ -8,42 +8,6 @@ const idType = Number;
 
 export class User {
   @ApiProperty({
-    type: () => String,
-    nullable: true,
-  })
-  englishLevel?: string | null;
-
-  @ApiProperty({
-    type: () => String,
-    nullable: true,
-  })
-  learningGoals?: string | null;
-
-  @ApiProperty({
-    type: () => String,
-    nullable: true,
-  })
-  certifications?: string | null;
-
-  @ApiProperty({
-    type: () => String,
-    nullable: true,
-  })
-  spokenLanguages?: string | null;
-
-  @ApiProperty({
-    type: () => Number,
-    nullable: true,
-  })
-  hourlyRate?: number | null;
-
-  @ApiProperty({
-    type: () => String,
-    nullable: true,
-  })
-  bio?: string | null;
-
-  @ApiProperty({
     type: idType,
   })
   id: number | string;
@@ -57,20 +21,6 @@ export class User {
 
   @Exclude({ toPlainOnly: true })
   password?: string;
-
-  @ApiProperty({
-    type: String,
-    example: 'email',
-  })
-  @Expose({ groups: ['me', 'admin'] })
-  provider: string;
-
-  @ApiProperty({
-    type: String,
-    example: '1234567890',
-  })
-  @Expose({ groups: ['me', 'admin'] })
-  socialId?: string | null;
 
   @ApiProperty({
     type: String,
@@ -98,6 +48,22 @@ export class User {
     type: () => Status,
   })
   status?: Status;
+
+  @ApiProperty({
+    type: () => Object,
+    nullable: true,
+    description: 'Student group (admin roster)',
+  })
+  group?: { id: string; name?: string } | null;
+
+  @ApiProperty({ nullable: true })
+  adminNotes?: string | null;
+
+  @ApiProperty({ nullable: true })
+  nextPaymentDate?: Date | null;
+
+  @ApiProperty({ nullable: true })
+  nextPaymentAmount?: number | null;
 
   @ApiProperty()
   createdAt: Date;

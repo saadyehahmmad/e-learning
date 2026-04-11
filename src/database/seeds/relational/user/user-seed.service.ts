@@ -7,6 +7,10 @@ import { RoleEnum } from '../../../../roles/roles.enum';
 import { StatusEnum } from '../../../../statuses/statuses.enum';
 import { UserEntity } from '../../../../users/infrastructure/persistence/relational/entities/user.entity';
 
+/**
+ * Seeds baseline users (admin, tutor, student) matching UserEntity columns.
+ * Must run after role and status seeds; e-learning seed expects `user@student.com`.
+ */
 @Injectable()
 export class UserSeedService {
   constructor(
@@ -14,6 +18,7 @@ export class UserSeedService {
     private repository: Repository<UserEntity>,
   ) {}
 
+  /** Upserts demo accounts by email or by fixed role slot. */
   async run() {
     const usersToSeed = [
       {
@@ -31,10 +36,6 @@ export class UserSeedService {
         password: 'tutor',
         roleId: RoleEnum.tutor,
         roleName: 'Tutor',
-        bio: 'Certified English tutor focused on speaking confidence.',
-        hourlyRate: 25,
-        spokenLanguages: 'English,Arabic',
-        certifications: 'TESOL,IELTS',
       },
       {
         firstName: 'John',
@@ -43,8 +44,6 @@ export class UserSeedService {
         password: 'student',
         roleId: RoleEnum.student,
         roleName: 'Student',
-        learningGoals: 'Improve speaking and business writing',
-        englishLevel: 'A2',
       },
     ];
 
@@ -66,12 +65,6 @@ export class UserSeedService {
           lastName: user.lastName,
           email: user.email,
           password: hashedPassword,
-          bio: user.bio,
-          hourlyRate: user.hourlyRate,
-          spokenLanguages: user.spokenLanguages,
-          certifications: user.certifications,
-          learningGoals: user.learningGoals,
-          englishLevel: user.englishLevel,
           role: {
             id: user.roleId,
             name: user.roleName,

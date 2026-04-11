@@ -36,33 +36,36 @@ export class StudentAnswerRelationalRepository implements StudentAnswerRepositor
     return entities.map((entity) => StudentAnswerMapper.toDomain(entity));
   }
 
-  async findByQuizId(quizId: string): Promise<StudentAnswer[]> {
+  async findByPlacementId(placementId: string): Promise<StudentAnswer[]> {
     const entities = await this.studentAnswerRepository.find({
-      where: { quiz: { id: quizId } },
+      where: { placement: { id: placementId } },
+      /** Avoid eager placement+user graphs (N× heavy JOINs per row). */
+      loadEagerRelations: false,
     });
 
     return entities.map((entity) => StudentAnswerMapper.toDomain(entity));
   }
 
-  async findByQuizIdAndStudentId(
-    quizId: string,
+  async findByPlacementIdAndStudentId(
+    placementId: string,
     studentId: number,
   ): Promise<StudentAnswer[]> {
     const entities = await this.studentAnswerRepository.find({
-      where: { quiz: { id: quizId }, student: { id: studentId } },
+      where: { placement: { id: placementId }, student: { id: studentId } },
+      loadEagerRelations: false,
     });
 
     return entities.map((entity) => StudentAnswerMapper.toDomain(entity));
   }
 
-  async getAttemptSummaryByQuizIdAndStudentId(
-    quizId: string,
+  async getAttemptSummaryByPlacementIdAndStudentId(
+    placementId: string,
     studentId: number,
   ): Promise<{ attemptCount: number; lastSubmittedAt: Date | null }> {
     const rows = await this.studentAnswerRepository
       .createQueryBuilder('studentAnswer')
       .select('studentAnswer.submittedAt', 'submittedAt')
-      .where('studentAnswer.quizId = :quizId', { quizId })
+      .where('studentAnswer.placementId = :placementId', { placementId })
       .andWhere('studentAnswer.studentId = :studentId', { studentId })
       .distinct(true)
       .orderBy('studentAnswer.submittedAt', 'DESC')

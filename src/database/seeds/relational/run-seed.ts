@@ -8,7 +8,7 @@ import { ELearningSeedService } from './e-learning/e-learning-seed.service';
 const runSeed = async () => {
   const app = await NestFactory.create(SeedModule);
 
-  // run
+  // Order matters: roles/status → users → placement/payments demo data.
   await app.get(RoleSeedService).run();
   await app.get(StatusSeedService).run();
   await app.get(UserSeedService).run();

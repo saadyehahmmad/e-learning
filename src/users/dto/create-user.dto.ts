@@ -19,54 +19,6 @@ import { StatusDto } from '../../statuses/dto/status.dto';
 import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer';
 
 export class CreateUserDto {
-  @ApiProperty({
-    required: false,
-    type: () => String,
-  })
-  @IsOptional()
-  @IsString()
-  englishLevel?: string | null;
-
-  @ApiProperty({
-    required: false,
-    type: () => String,
-  })
-  @IsOptional()
-  @IsString()
-  learningGoals?: string | null;
-
-  @ApiProperty({
-    required: false,
-    type: () => String,
-  })
-  @IsOptional()
-  @IsString()
-  certifications?: string | null;
-
-  @ApiProperty({
-    required: false,
-    type: () => String,
-  })
-  @IsOptional()
-  @IsString()
-  spokenLanguages?: string | null;
-
-  @ApiProperty({
-    required: false,
-    type: () => Number,
-  })
-  @IsOptional()
-  @IsNumber()
-  hourlyRate?: number | null;
-
-  @ApiProperty({
-    required: false,
-    type: () => String,
-  })
-  @IsOptional()
-  @IsString()
-  bio?: string | null;
-
   @ApiProperty({ example: 'test1@example.com', type: String })
   @Transform(lowerCaseTransformer)
   @IsNotEmpty()
@@ -76,10 +28,6 @@ export class CreateUserDto {
   @ApiProperty()
   @MinLength(6)
   password?: string;
-
-  provider?: string;
-
-  socialId?: string | null;
 
   @ApiProperty({ example: 'John', type: String })
   @IsNotEmpty()
@@ -102,4 +50,23 @@ export class CreateUserDto {
   @IsOptional()
   @Type(() => StatusDto)
   status?: StatusDto;
+
+  @ApiPropertyOptional({ description: 'Student group id (`g_<uuid>`)' })
+  @IsOptional()
+  @IsString()
+  groupId?: string | null;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  adminNotes?: string | null;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  nextPaymentDate?: Date | null;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  nextPaymentAmount?: number | null;
 }

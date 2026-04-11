@@ -1,6 +1,4 @@
-import { QuizEntity } from '../../../../../quizzes/infrastructure/persistence/relational/entities/quiz.entity';
-
-import { QuestionEntity } from '../../../../../questions/infrastructure/persistence/relational/entities/question.entity';
+import { PlacementEntity } from '../../../../../placement/infrastructure/persistence/relational/entities/placement.entity';
 
 import { UserEntity } from '../../../../../users/infrastructure/persistence/relational/entities/user.entity';
 
@@ -36,11 +34,14 @@ export class StudentAnswerEntity extends EntityRelationalHelper {
   })
   answer: string;
 
-  @ManyToOne(() => QuizEntity, { eager: true, nullable: false })
-  quiz: QuizEntity;
+  @ManyToOne(() => PlacementEntity, { eager: true, nullable: false })
+  placement: PlacementEntity;
 
-  @ManyToOne(() => QuestionEntity, { eager: true, nullable: false })
-  question: QuestionEntity;
+  @Column({
+    nullable: false,
+    type: 'uuid',
+  })
+  questionId: string;
 
   @ManyToOne(() => UserEntity, { eager: true, nullable: false })
   student: UserEntity;

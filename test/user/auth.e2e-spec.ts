@@ -139,7 +139,7 @@ describe('Auth Module', () => {
         })
         .send()
         .expect(({ body }) => {
-          expect(body.provider).toBeDefined();
+          expect(body.id).toBeDefined();
           expect(body.email).toBeDefined();
           expect(body.hash).not.toBeDefined();
           expect(body.password).not.toBeDefined();

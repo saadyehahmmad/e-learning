@@ -3,6 +3,9 @@ import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer';
 
+/**
+ * Body for `POST /auth/email/register`. Role is assigned as **student** on the server; clients send only profile fields.
+ */
 export class AuthRegisterLoginDto {
   @ApiProperty({ example: 'test1@example.com', type: String })
   @Transform(lowerCaseTransformer)

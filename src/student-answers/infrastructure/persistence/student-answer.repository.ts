@@ -14,15 +14,15 @@ export abstract class StudentAnswerRepository {
     paginationOptions: IPaginationOptions;
   }): Promise<StudentAnswer[]>;
 
-  abstract findByQuizId(quizId: string): Promise<StudentAnswer[]>;
+  abstract findByPlacementId(placementId: string): Promise<StudentAnswer[]>;
 
-  abstract findByQuizIdAndStudentId(
-    quizId: string,
+  abstract findByPlacementIdAndStudentId(
+    placementId: string,
     studentId: number,
   ): Promise<StudentAnswer[]>;
 
-  abstract getAttemptSummaryByQuizIdAndStudentId(
-    quizId: string,
+  abstract getAttemptSummaryByPlacementIdAndStudentId(
+    placementId: string,
     studentId: number,
   ): Promise<{ attemptCount: number; lastSubmittedAt: Date | null }>;
 

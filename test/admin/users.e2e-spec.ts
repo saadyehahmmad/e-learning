@@ -136,7 +136,7 @@ describe('Users Module', () => {
           .expect(200)
           .send()
           .expect(({ body }) => {
-            expect(body.data[0].provider).toBeDefined();
+            expect(body.data[0].id).toBeDefined();
             expect(body.data[0].email).toBeDefined();
             expect(body.data[0].hash).not.toBeDefined();
             expect(body.data[0].password).not.toBeDefined();
