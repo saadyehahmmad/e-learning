@@ -1,5 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 
 export class PatchStudentDto {
   @ApiPropertyOptional()
@@ -41,4 +48,12 @@ export class PatchStudentDto {
   @IsOptional()
   @IsNumber()
   nextPaymentAmount?: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Optional new password for the student account',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(6)
+  password?: string;
 }

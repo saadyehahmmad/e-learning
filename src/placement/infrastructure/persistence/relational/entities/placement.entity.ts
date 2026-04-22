@@ -59,12 +59,6 @@ export class PlacementEntity extends EntityRelationalHelper {
 
   @Column({
     nullable: true,
-    type: 'int',
-  })
-  maxQuestions?: number | null;
-
-  @Column({
-    nullable: true,
     type: 'text',
   })
   quizDescription?: string | null;

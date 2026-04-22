@@ -47,7 +47,6 @@ export class ELearningSeedService {
         'One-time entry assessment with timed questions for level grading.',
       passingScore: 60,
       examDurationMinutes: 50,
-      maxQuestions: 50,
       quizDescription: 'Placement exam description for learners',
       courseTitle: 'Placement Course',
       courseLevel: 'all',
@@ -85,7 +84,6 @@ export class ELearningSeedService {
     description: string;
     passingScore: number;
     examDurationMinutes: number;
-    maxQuestions: number;
     quizDescription: string;
     courseTitle: string;
     courseLevel: string;

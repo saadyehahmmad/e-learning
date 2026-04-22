@@ -24,9 +24,6 @@ export class Placement {
   examDurationMinutes?: number | null;
 
   @ApiProperty({ nullable: true })
-  maxQuestions?: number | null;
-
-  @ApiProperty({ nullable: true })
   quizDescription?: string | null;
 
   @ApiProperty({ nullable: true })

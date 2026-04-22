@@ -95,13 +95,6 @@ export class PlacementService {
         errors: { placement: 'notExists' },
       });
     }
-    const maxQ = p.maxQuestions ?? 50;
-    if (p.questions.length >= maxQ) {
-      throw new UnprocessableEntityException({
-        status: HttpStatus.UNPROCESSABLE_ENTITY,
-        errors: { placementTest: 'maxQuestions' },
-      });
-    }
     const now = new Date();
     const q = Object.assign(new PlacementQuestion(), {
       id: randomUUID(),

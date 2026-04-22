@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PlacementService } from '../placement/placement.service';
 import {
   parsePlacementQuestionOptions,
@@ -37,13 +33,10 @@ export class AdminPlacementService {
       });
     }
 
-    const maxQuestions = placement.maxQuestions ?? 50;
-
     return {
       placementId: `placement-${placement.id}`,
       title: placement.title,
       examDurationMinutes: placement.examDurationMinutes ?? 50,
-      maxQuestions,
       description:
         placement.description ??
         placement.quizDescription ??
@@ -64,16 +57,6 @@ export class AdminPlacementService {
     correctAnswer: string;
   }) {
     const placement = await this._requirePlacement();
-    const maxQuestions = placement.maxQuestions ?? 50;
-    if (placement.questions.length >= maxQuestions) {
-      throw new ConflictException({
-        error: {
-          code: 'CONFLICT',
-          message: 'Maximum number of placement questions reached',
-          details: [{ field: 'maxQuestions', issue: 'at_capacity' }],
-        },
-      });
-    }
 
     const optionsPayload = serializePlacementQuestionOptions(
       body.type,

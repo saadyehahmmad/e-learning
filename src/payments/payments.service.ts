@@ -11,6 +11,8 @@ import { CreatePaymentDto } from './dto/create-payment.dto';
 import { PaymentRepository } from './infrastructure/persistence/payment.repository';
 import { IPaginationOptions } from '../utils/types/pagination-options';
 import { Payment } from './domain/payment';
+import { PaymentStatusEnum } from './payment-status.enum';
+import { StatusEnum } from '../statuses/statuses.enum';
 /**
  * Persists student payments without requiring course enrollment (Fluentia admin model).
  */
@@ -37,7 +39,7 @@ export class PaymentsService {
       });
     }
 
-    return this.paymentRepository.create({
+    const payment = await this.paymentRepository.create({
       student: studentObject,
       amount: createPaymentDto.amount,
       currency: createPaymentDto.currency.toUpperCase(),
@@ -45,6 +47,13 @@ export class PaymentsService {
       status: createPaymentDto.status,
       paidAt: createPaymentDto.paidAt ?? new Date(),
     });
+
+    await this.activateStudentIfPaymentSucceeded(
+      Number(studentObject.id),
+      payment.status,
+    );
+
+    return payment;
   }
 
   /**
@@ -70,7 +79,7 @@ export class PaymentsService {
       });
     }
 
-    return this.paymentRepository.create({
+    const payment = await this.paymentRepository.create({
       student: studentObject,
       amount: data.amount,
       currency: data.currency.toUpperCase(),
@@ -78,6 +87,13 @@ export class PaymentsService {
       status: data.status,
       paidAt: data.paidAt ?? new Date(),
     });
+
+    await this.activateStudentIfPaymentSucceeded(
+      Number(studentObject.id),
+      payment.status,
+    );
+
+    return payment;
   }
 
   findAllWithPagination({
@@ -137,7 +153,7 @@ export class PaymentsService {
       student = studentObject;
     }
 
-    return this.paymentRepository.update(id, {
+    const updatedPayment = await this.paymentRepository.update(id, {
       paidAt: updatePaymentDto.paidAt,
 
       providerReference: updatePaymentDto.providerReference,
@@ -150,9 +166,33 @@ export class PaymentsService {
 
       student,
     });
+
+    if (updatedPayment?.student?.id) {
+      await this.activateStudentIfPaymentSucceeded(
+        Number(updatedPayment.student.id),
+        updatedPayment.status,
+      );
+    }
+
+    return updatedPayment;
   }
 
   remove(id: Payment['id']) {
     return this.paymentRepository.remove(id);
+  }
+
+  private async activateStudentIfPaymentSucceeded(
+    studentId: number,
+    paymentStatus: string,
+  ): Promise<void> {
+    if (paymentStatus !== PaymentStatusEnum.paid) {
+      return;
+    }
+
+    await this.userService.update(studentId, {
+      status: {
+        id: StatusEnum.active,
+      },
+    });
   }
 }

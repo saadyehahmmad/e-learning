@@ -45,11 +45,10 @@ export class CreateStudentDto {
   @IsNumber()
   nextPaymentAmount?: number | null;
 
-  @ApiPropertyOptional({
-    description: 'Optional initial password for the student account',
+  @ApiProperty({
+    description: 'Initial password for the student account',
   })
-  @IsOptional()
   @IsString()
   @MinLength(6)
-  password?: string;
+  password: string;
 }

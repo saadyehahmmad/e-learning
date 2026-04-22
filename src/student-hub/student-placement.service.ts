@@ -27,13 +27,10 @@ export class StudentPlacementService {
       });
     }
 
-    const maxQuestions = placement.maxQuestions ?? 50;
-
     return {
       placementId: `placement-${placement.id}`,
       title: placement.title,
       examDurationMinutes: placement.examDurationMinutes ?? 50,
-      maxQuestions,
       description:
         placement.description ??
         placement.quizDescription ??

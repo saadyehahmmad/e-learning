@@ -13,7 +13,6 @@ export class PlacementMapper {
     p.passingScore = raw.passingScore;
     p.description = raw.description;
     p.examDurationMinutes = raw.examDurationMinutes;
-    p.maxQuestions = raw.maxQuestions;
     p.quizDescription = raw.quizDescription;
     p.courseTitle = raw.courseTitle;
     p.courseLevel = raw.courseLevel;
@@ -32,7 +31,6 @@ export class PlacementMapper {
     e.passingScore = domain.passingScore;
     e.description = domain.description;
     e.examDurationMinutes = domain.examDurationMinutes;
-    e.maxQuestions = domain.maxQuestions;
     e.quizDescription = domain.quizDescription;
     e.courseTitle = domain.courseTitle;
     e.courseLevel = domain.courseLevel;

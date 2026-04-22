@@ -90,6 +90,7 @@ export class AdminStudentsService {
     const nextPaymentCurrency =
       full.payments.find((p) => p.currency)?.currency ?? 'USD';
     return {
+      status: full.status,
       placementCompleted:
         Boolean(full.placement.submittedAt) &&
         full.placement.totalQuestions > 0,
@@ -148,12 +149,12 @@ export class AdminStudentsService {
     notes?: string;
     nextPaymentDate?: string | null;
     nextPaymentAmount?: number | null;
-    /** Optional initial password (not in public spec; required for login provisioning). */
-    password?: string;
+    /** Initial password for login provisioning. */
+    password: string;
   }) {
     const created = await this.usersService.create({
       email: body.email.trim().toLowerCase(),
-      password: body.password ?? `Temp-${Date.now()}-!`,
+      password: body.password,
       firstName: body.firstName.trim(),
       lastName: body.lastName.trim(),
       role: { id: RoleEnum.student },
@@ -199,6 +200,7 @@ export class AdminStudentsService {
       notes: string;
       nextPaymentDate: string | null;
       nextPaymentAmount: number | null;
+      password: string;
     }>,
   ) {
     const id = parseStudentPublicId(studentPublicId);
@@ -219,6 +221,7 @@ export class AdminStudentsService {
       firstName: body.firstName,
       lastName: body.lastName,
       email: body.email,
+      password: body.password,
       status:
         body.status !== undefined
           ? {
