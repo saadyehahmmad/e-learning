@@ -174,12 +174,8 @@ export class UsersService {
     let password: string | undefined = undefined;
 
     if (updateUserDto.password) {
-      const userObject = await this.usersRepository.findById(id);
-
-      if (userObject && userObject?.password !== updateUserDto.password) {
-        const salt = await bcrypt.genSalt();
-        password = await bcrypt.hash(updateUserDto.password, salt);
-      }
+      const salt = await bcrypt.genSalt();
+      password = await bcrypt.hash(updateUserDto.password, salt);
     }
 
     let email: string | null | undefined = undefined;
